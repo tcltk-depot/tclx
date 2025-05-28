@@ -16,7 +16,16 @@
  *-----------------------------------------------------------------------------
  */
 
+#include <tcl.h>
 #include "tclExtdInt.h"
+
+#ifndef TCL_VERSION
+# if TCL_MAJOR_VERSION > 8
+#  define TCL_VERSION "9.0"
+# else
+#  define TCL_VERSION "8.6"
+# endif
+#endif
 
 /*
  * Tcl procedure to search for an init for TclX startup file.  
@@ -56,9 +65,10 @@ Tclx_Init (Tcl_Interp *interp)
     }
 
     if ((Tcl_EvalEx(interp, initScript, -1,
-	    TCL_EVAL_GLOBAL | TCL_EVAL_DIRECT) != TCL_OK)
-	    || (TclX_LibraryInit(interp) != TCL_OK)) {
+		    TCL_EVAL_GLOBAL | TCL_EVAL_DIRECT) != TCL_OK)
+	|| (TclX_LibraryInit(interp) != TCL_OK)) {
 	Tcl_AddErrorInfo(interp, "\n    (in TclX_Init)");
+	/*Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj("\n    (in TclX_Init)", -1));*/
 	return TCL_ERROR;
     }
 
@@ -77,14 +87,15 @@ Tclx_SafeInit (Tcl_Interp *interp)
 {
     if (
 #ifdef USE_TCL_STUBS
-	(Tcl_InitStubs(interp, "9.0", 0) == NULL)
+	(Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL)
 #else
-	(Tcl_PkgRequire(interp, "Tcl", "9.0", 0) == NULL)
+	(Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL)
 #endif
 	|| (Tclxcmd_Init(interp) != TCL_OK)
 	|| (Tcl_PkgProvide(interp, "Tclx", PACKAGE_VERSION) != TCL_OK)
 	) {
-	Tcl_AddErrorInfo (interp, "\n    (in TclX_SafeInit)");
+	Tcl_AddErrorInfo(interp, "\n    (in TclX_SafeInit)");
+	/*Tcl_AppendObjToErrorInfo (interp, obj);*/
 	return TCL_ERROR;
     }
 

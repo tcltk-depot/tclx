@@ -402,8 +402,16 @@ ProfCommandEvalSetup (profInfo_t *infoPtr, int *isProcPtr)
         cmdInfo.proc = infoPtr->savedCmdInfo.proc;
     if (cmdInfo.clientData == (ClientData) infoPtr)
         cmdInfo.clientData = infoPtr->savedCmdInfo.clientData;
-    if (cmdInfo.objProc2 == ProfObjCommandEval)
-        cmdInfo.objProc2 = infoPtr->savedCmdInfo.objProc2;
+#if TCL_MAJOR_VERSION < 9
+    if (cmdInfo.objProc == ProfObjCommandEval) {
+        cmdInfo.objProc = infoPtr->savedCmdInfo.objProc;
+    }
+#else
+    if (cmdInfo.objProc2 == ProfObjCommandEval) {
+	cmdInfo.objProc2 = infoPtr->savedCmdInfo.objProc2;
+	cmdInfo.objProc = NULL;
+    }
+#endif    
     if (cmdInfo.objClientData == (ClientData) infoPtr)
         cmdInfo.objClientData = infoPtr->savedCmdInfo.objClientData;
     if (cmdInfo.deleteProc == NULL)
@@ -545,8 +553,13 @@ ProfObjCommandEval (ClientData    clientData,
 
     ProfCommandEvalSetup (infoPtr, &isProc);
 
+#if TCL_MAJOR_VERSION < 9
     result = (*infoPtr->savedCmdInfo.objProc)(infoPtr->savedCmdInfo.objClientData, interp,
                                         objc, objv);
+#else
+    result = (*infoPtr->savedCmdInfo.objProc2)(infoPtr->savedCmdInfo.objClientData, interp,
+                                        objc, objv);
+#endif
 
     ProfCommandEvalFinishup (infoPtr, isProc);
     return result;
@@ -590,7 +603,11 @@ ProfTraceRoutine (ClientData   clientData,
      */
     cmdInfo.proc = ProfStrCommandEval;
     cmdInfo.clientData = (ClientData) infoPtr;
+#if TCL_MAJOR_VERSION < 9
+    cmdInfo.objProc = ProfObjCommandEval;
+#else
     cmdInfo.objProc2 = ProfObjCommandEval;
+#endif
     cmdInfo.objClientData = (ClientData) infoPtr;
     cmdInfo.isNativeObjectProc = infoPtr->savedCmdInfo.isNativeObjectProc;
     cmdInfo.deleteProc = NULL;
@@ -675,9 +692,15 @@ TurnOnProfiling (profInfo_t *infoPtr, int commandMode, int evalMode)
     CleanDataTable (infoPtr);
 
     infoPtr->traceHandle =
+#if TCL_MAJOR_VERSION < 9
+        Tcl_CreateObjTrace (infoPtr->interp, 0,
+                         TCL_ALLOW_INLINE_COMPILATION, ProfTraceRoutine,
+                         (ClientData) infoPtr, NULL);
+#else
         Tcl_CreateObjTrace2 (infoPtr->interp, 0,
                          TCL_ALLOW_INLINE_COMPILATION, ProfTraceRoutine,
                          (ClientData) infoPtr, NULL);
+#endif
     infoPtr->commandMode = commandMode;
     infoPtr->evalMode = evalMode;
     infoPtr->realTime = 0;
@@ -943,11 +966,19 @@ TclX_ProfileInit (Tcl_Interp *interp)
 
     Tcl_CallWhenDeleted (interp, ProfMonCleanUp, (ClientData) infoPtr);
 
+#if TCL_MAJOR_VERSION < 9
+    Tcl_CreateObjCommand (interp, 
+			  "profile",
+			  TclX_ProfileObjCmd,
+			  (ClientData) infoPtr,
+			  (Tcl_CmdDeleteProc*) NULL);
+#else
     Tcl_CreateObjCommand2 (interp, 
 			   "profile",
 			   TclX_ProfileObjCmd,
                            (ClientData) infoPtr,
 			   (Tcl_CmdDeleteProc*) NULL);
+#endif
 }
 
 /* vim: set ts=4 sw=4 sts=4 et : */

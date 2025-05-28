@@ -304,7 +304,7 @@ TraceCallBack (Tcl_Interp *interp,
     sprintf (numBuf, "%d", level);
     Tcl_DStringAppendElement (&callback, numBuf);
 
-    sprintf (numBuf, "%" TCL_Z_MODIFIER "d",  ((iPtr->varFramePtr == NULL) ? 0 : 
+    sprintf (numBuf, "%" TCLX_SIZE_MODIFIER "d",  ((iPtr->varFramePtr == NULL) ? 0 : 
              iPtr->varFramePtr->level));
     Tcl_DStringAppendElement (&callback, numBuf);
 

@@ -398,7 +398,7 @@ TclX_LoopObjCmd (ClientData dummy,
 		
 		sprintf (buf, "\n    (\"loop\" body line %d)", 
 			ERRORLINE(interp));
-		Tcl_AddErrorInfo (interp, buf);
+		Tcl_AppendObjToErrorInfo (interp, Tcl_NewStringObj(buf, -1));
 	    }
 	    break;
 	}
@@ -459,12 +459,14 @@ GlobalImport (Tcl_Interp *interp)
 				 globalObjc,
 				 globalObjv);
       break;
+#if TCL_MAJOR_VERSION >= 9
     case 2:
       code = (*cmdInfo.objProc2) (cmdInfo.objClientData,
 				  interp,
 				  globalObjc,
 				  globalObjv);
       break;
+#endif
     }
     
     for (idx = 0; idx < globalObjc; idx++) {

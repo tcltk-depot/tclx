@@ -25,6 +25,24 @@
  */
 #include "tclInt.h"
 
+/* Make work for Tcl 8.6 and 9.0 */
+#if TCL_MAJOR_VERSION < 9
+
+#  define TCLX_SIZE_MODIFIER ""
+
+#  ifdef Tcl_CreateObjCommand2
+#    undef Tcl_CreateObjCommand2
+#    undef Tcl_CreateObjTrace2
+#  endif
+#  define Tcl_CreateObjCommand2 Tcl_CreateObjCommand
+#  define Tcl_CreateObjTrace2 Tcl_CreateObjTrace
+
+#else
+
+#  define TCLX_SIZE_MODIFIER TCL_Z_MODIFIER
+
+#endif /* TCL_MAJOR_VERSION < 9 */
+
 #if defined(__WIN32__) || defined(_WIN32)
 #   include "tclXwinPort.h"
 #else
@@ -187,11 +205,7 @@ extern Tcl_Obj *tclXWrongArgsObj;
 /*
  * Handle hiding of errorLine in 8.6
  */
-#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 6)
-#define ERRORLINE(interp) ((interp)->errorLine)
-#else
 #define ERRORLINE(interp) (Tcl_GetErrorLine(interp))
-#endif
 
 /*
  * Callback type for walking directories.
@@ -208,6 +222,13 @@ typedef int
  */
 
 extern int
+#if (TCL_MAJOR_VERSION < 9)
+#  ifdef Tcl_ObjCmdProc2
+#    undef Tcl_ObjCmdProc2
+#  endif
+#  define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
+#endif
+
 TclX_CreateObjCommand (Tcl_Interp* interp, char* cmdName,
                        Tcl_ObjCmdProc2 *proc, ClientData clientData,
                        Tcl_CmdDeleteProc *deleteProc, int flags);

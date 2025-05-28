@@ -7,6 +7,9 @@ if {[cequal [info procs Test] {}]} {
     source [file join [file dirname [info script]] testlib.tcl]
 }
 
+# Tcl 9 has different error messages
+testConstraint UsingTcl9 [package vsatisfies 9.0 $::tcl_version]
+
 set x {abcd bbcd 123 234 345 445}
 
 Test lmatch-1.1 {lmatch command} {
@@ -43,7 +46,9 @@ Test lmatch-2.2.1 {search modes} {
 
 Test lmatch-2.3 {search modes} {
     lmatch -regexp {xyz bbcc *bc*} *bc*
-} 1 {cannot compile regular expression pattern: invalid quantifier operand}
+} 1 [expr {![testConstraint UsingTcl9] ?
+	   {couldn't compile regular expression pattern: quantifier operand invalid} :
+	   {cannot compile regular expression pattern: invalid quantifier operand}}]
 
 Test lmatch-2.4 {search modes} {
     lmatch -regexp {b.x ^bc xy bcx bca} ^bc

@@ -77,6 +77,8 @@ HELP_DIR_NATIVE	= `@CYGPATH@ ${HELP_DIR}`
 #========================================================================
 
 PKG_LIB_FILE	= @PKG_LIB_FILE@
+PKG_LIB_FILE8	= @PKG_LIB_FILE8@
+PKG_LIB_FILE9	= @PKG_LIB_FILE9@
 
 lib_BINARIES	= $(PKG_LIB_FILE)
 BINARIES	= $(lib_BINARIES)
@@ -263,9 +265,13 @@ $(PKG_LIB_FILE): $(PKG_OBJECTS)
 	$(RANLIB) $(PKG_LIB_FILE)
 
 pkgIndex.tcl:
-	(echo 'package ifneeded Tclx $(PACKAGE_VERSION) \
-		[list load [file join $$dir $(PKG_LIB_FILE)] Tclx]'\
-	) > pkgIndex.tcl
+	echo 'if {[package vsatisfies 8.6 [set ::tcl_version]]} {'                                                   > $@
+	echo '    package ifneeded Tclx $(PACKAGE_VERSION) [list load [file join [set dir] $(PKG_LIB_FILE8)] Tclx]' >> $@
+	echo '} else {'                                                                                             >> $@
+	echo '    package ifneeded Tclx $(PACKAGE_VERSION) [list load [file join [set dir] $(PKG_LIB_FILE9)] Tclx]' >> $@
+	echo '}'                                                                                                    >> $@
+
+
 
 #========================================================================
 # We need to enumerate the list of .c to .o lines here.

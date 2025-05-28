@@ -20,6 +20,9 @@ if {[cequal [info procs Test] {}]} {
     source [file join [file dirname [info script]] testlib.tcl]
 }
 
+# Tcl 9 has different error messages
+testConstraint UsingTcl9 [package vsatisfies 9.0 $::tcl_version]
+
 # Increment a name.  This takes a name and "adds one" to it, that is advancing
 # each digit lexically through "0"..."9" -> "A"-"Z" -> "a"..."z".  When one
 # digit wraps, the next one is advanced.  Optional arg forces upper case only
@@ -403,7 +406,9 @@ set testCH [scancontext create]
 
 Test filescan-7.1 {filescan tests} {
     scanmatch $testCH {a[} {}
-} 1 {cannot compile regular expression pattern: brackets [] not balanced}
+} 1 [expr {![testConstraint UsingTcl9] ?
+	       {couldn't compile regular expression pattern: brackets [] not balanced} :
+	       {cannot compile regular expression pattern: brackets [] not balanced}}]
 
 #
 # Test the copy file manipulation by sorting a file of numbered lines into two

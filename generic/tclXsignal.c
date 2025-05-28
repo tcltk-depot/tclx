@@ -745,8 +745,7 @@ EvalTrapCode (Tcl_Interp *interp, int signalNum)
 
         sprintf (errorInfo, "\n    while executing signal trap code for %s%s",
                  Tcl_SignalId (signalNum), " signal");
-        Tcl_AddErrorInfo (interp, errorInfo);
-
+	Tcl_AppendObjToErrorInfo (interp, Tcl_NewStringObj(errorInfo, -1));
         return TCL_ERROR;
     }
     

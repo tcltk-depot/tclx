@@ -331,22 +331,25 @@ TclX_RelativeExpr (Tcl_Interp  *interp,
     char *exprStr, *buf;
     Tcl_Size exprLen, exprStrLen;
     int  result;
-    Tcl_Size wideResult;
     long longResult;
     char staticBuf [32];
 
-    if (0 && exprPtr->typePtr == Tcl_GetObjType ("int")) {
+#if TCL_MAJOR_VERSION < 9
+    if ( exprPtr->typePtr == Tcl_GetObjType ("int")) {
         int intResult;
         if (Tcl_GetIntFromObj (interp, exprPtr, &intResult) != TCL_OK)
             return TCL_ERROR;
 	*exprResultPtr = intResult;
         return TCL_OK;
     }
+#else
     /* "endValue" references the last element, not the length, hench -1 below */
+    Tcl_Size wideResult;
     if (Tcl_GetIntForIndex(interp, exprPtr, (stringLen-1), &wideResult) == TCL_OK) {
         *exprResultPtr = wideResult;
         return TCL_OK;
     }
+#endif
 
     exprStr = Tcl_GetStringFromObj (exprPtr, &exprStrLen);
 
@@ -359,8 +362,14 @@ TclX_RelativeExpr (Tcl_Interp  *interp,
         return TCL_OK;
     }
 
+#ifdef TCL_Z_MODIFIER
     sprintf (staticBuf, "%" TCL_Z_MODIFIER "d",
              stringLen - ((exprStr [0] == 'e') ? 1 : 0));
+#else
+    sprintf (staticBuf, "%d",
+             stringLen - ((exprStr [0] == 'e') ? 1 : 0));
+#endif
+    
     exprLen = strlen (staticBuf) + exprStrLen - 2;
 
     buf = staticBuf;

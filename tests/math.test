@@ -20,6 +20,9 @@ if {[cequal [info procs Test] {}]} {
     source [file join [file dirname [info script]] testlib.tcl]
 }
 
+# Tcl 9 has different error messages
+testConstraint UsingTcl9 [package vsatisfies 9.0 $::tcl_version]
+
 #if {[package vcompare $::tcl_patchLevel 9.0] >= 0} {
 #    source 
 #}
@@ -79,7 +82,10 @@ Test math-2.4.3 {max tests} {
 
 Test math-2.5 {max tests} {
     max
-} 1 {not enough arguments for math function "max"}
+} 1 [expr {![testConstraint UsingTcl9] ?
+	   {not enough arguments to math function "max"} :
+	   {not enough arguments for math function "max"}}]
+
 
 Test math-2.6 {max tests} {
     max 1 2 3 foo
@@ -115,7 +121,9 @@ Test math-3.3.2 {min tests} {
 
 Test math-3.4 {min tests} {
     min
-} 1 {not enough arguments for math function "min"}
+} 1 [expr {![testConstraint UsingTcl9] ?
+	   {not enough arguments to math function "min"} :
+	   {not enough arguments for math function "min"}}]
 
 Test math-3.5 {min tests} {
     min 1 2 3 foo
