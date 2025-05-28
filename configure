@@ -5339,7 +5339,7 @@ $as_echo "${result}" >&6; }
 if test "${TEA_PLATFORM}" = "windows" ; then
     $as_echo "#define BUILD_tclx 1" >>confdefs.h
 
-    CLEANFILES="pkgIndex.tcl *.lib *.dll *.exp *.ilk *.pdb vc*.pch"
+    CLEANFILES="pkgIndex.tcl gorp.file *.lib *.dll *.exp *.ilk *.pdb vc*.pch"
 
     vars="tclXwinCmds.c tclXwinDup.c tclXwinId.c tclXwinOS.c"
     for i in $vars; do
@@ -5394,7 +5394,7 @@ if test "${TEA_PLATFORM}" = "windows" ; then
 
 
 else
-    CLEANFILES="pkgIndex.tcl"
+    CLEANFILES="pkgIndex.tcl gorp.file"
 
     vars="tclXunixCmds.c tclXunixDup.c tclXunixId.c tclXunixOS.c
 			tclXunixSock.c"

@@ -94,12 +94,12 @@ TEA_PRIVATE_TCL_HEADERS
 
 if test "${TEA_PLATFORM}" = "windows" ; then
     AC_DEFINE(BUILD_tclx)
-    CLEANFILES="pkgIndex.tcl *.lib *.dll *.exp *.ilk *.pdb vc*.pch"
+    CLEANFILES="pkgIndex.tcl gorp.file *.lib *.dll *.exp *.ilk *.pdb vc*.pch"
     TEA_ADD_SOURCES([tclXwinCmds.c tclXwinDup.c tclXwinId.c tclXwinOS.c])
     TEA_ADD_LIBS([wsock32.lib])
     TEA_ADD_INCLUDES([-I\"`${CYGPATH} ${srcdir}/win`\"])
 else
-    CLEANFILES="pkgIndex.tcl"
+    CLEANFILES="pkgIndex.tcl gorp.file"
     TEA_ADD_SOURCES([tclXunixCmds.c tclXunixDup.c tclXunixId.c tclXunixOS.c
 			tclXunixSock.c])
     TEA_ADD_LIBS([${MATH_LIBS}])

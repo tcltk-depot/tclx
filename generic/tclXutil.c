@@ -23,6 +23,10 @@
 #  define _toupper toupper
 #endif
 
+#ifndef TCL_SIZE_MODIFIER
+#  define TCL_SIZE_MODIFIER ""
+#endif
+
 /*
  * Prototypes of internal functions.
  */
@@ -362,13 +366,8 @@ TclX_RelativeExpr (Tcl_Interp  *interp,
         return TCL_OK;
     }
 
-#ifdef TCL_Z_MODIFIER
-    sprintf (staticBuf, "%" TCL_Z_MODIFIER "d",
+    sprintf (staticBuf, "%" TCL_SIZE_MODIFIER "d",
              stringLen - ((exprStr [0] == 'e') ? 1 : 0));
-#else
-    sprintf (staticBuf, "%d",
-             stringLen - ((exprStr [0] == 'e') ? 1 : 0));
-#endif
     
     exprLen = strlen (staticBuf) + exprStrLen - 2;
 
