@@ -136,13 +136,13 @@ TclX_ServerCreateCmd (ClientData clientData,
     struct sockaddr_in  local;
     int myPort, value;
     int backlog = 5;
-    int getReserved = FALSE;
+    /*int getReserved = FALSE; deprecated */
     Tcl_Channel channel = NULL;
 
     /*
      * Parse arguments.
      */
-    bzero ((VOID *) &local, sizeof (local));
+    bzero ((void *) &local, sizeof (local));
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = INADDR_ANY;
     nextArg = 1;
@@ -160,7 +160,8 @@ TclX_ServerCreateCmd (ClientData clientData,
                 goto missingArg;
             nextArg++;
             if (STREQU (argv [nextArg], "reserved")) {
-                getReserved = TRUE;
+	      /* deprecated 
+	      **getReserved = TRUE; */
             } else {
                 if (Tcl_GetInt (interp, argv [nextArg], &myPort) != TCL_OK)
                     return TCL_ERROR;
@@ -193,15 +194,16 @@ TclX_ServerCreateCmd (ClientData clientData,
     /*
      * Allocate a reserved port if requested.
      */
-#ifdef HAVE_RRESVPORT
-    if (getReserved) {
-        int port;
-        if (rresvport (&port) < 0)
-            goto unixError;
-        local.sin_port = port;
-    }
-#endif
-
+/* Depricated
+**#ifdef HAVE_RRESVPORT
+**    if (getReserved) {
+**        int port;
+**        if (rresvport (&port) < 0)
+**            goto unixError;
+**        local.sin_port = port;
+**    }
+**#endif
+*/
     /*
      * Open a socket and bind an address and port to it.
      */
@@ -300,7 +302,7 @@ TclX_ServerAcceptCmd (ClientData clientData,
     /*
      * Accept a socket connection on the socket created by server_create.
      */
-    bzero ((VOID *) &connectSocket, sizeof (connectSocket));
+    bzero ((void *) &connectSocket, sizeof (connectSocket));
 
     channel = TclX_GetOpenChannel (interp, argv [nextArg], 0);
     if (channel == NULL)

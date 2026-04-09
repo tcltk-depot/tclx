@@ -1123,10 +1123,11 @@ The \fBchannelfd\fR command is not available on \fBWindows\fR.
 .TP
 \fBchmod \fR[\fB\-fileid\fR] \fImode\fR \fIfilelist\fR
 .br
-Set permissions of each of the files in the list \fIfilelist\fR to \fImode\fR,
-where \fImode\fR is an absolute numeric mode or symbolic permissions as in the
-UNIX \fBchmod(1)\fR command.  To specify a mode as octal, it should be
-prefixed with a "0" (e.g. 0622).
+Set permissions of each of the files in the list \fIfilelist\fR to
+\fImode\fR, where \fImode\fR is an absolute numeric mode or symbolic
+permissions as in the UNIX \fBchmod(1)\fR command.  The numeric mode
+argument is assumed octal by default (e.g. 733), unless otherwised
+specified using an explicit radix indicator (e.g. 0d493).
 .sp
 If the option \fB\-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not

@@ -51,7 +51,7 @@ BinSearch (binSearchCB_t *searchCBPtr);
 static int 
 TclX_BsearchObjCmd (ClientData clientData, 
                     Tcl_Interp *interp,
-                    int objc,
+                    Tcl_Size objc,
                     Tcl_Obj *const objv[]);
 
 /*-----------------------------------------------------------------------------
@@ -295,7 +295,7 @@ BinSearch (binSearchCB_t *searchCBPtr)
 static int
 TclX_BsearchObjCmd (ClientData clientData,
                     Tcl_Interp *interp,
-                    int objc,
+                    Tcl_Size objc,
                     Tcl_Obj *const objv[])
 {
     int status;
@@ -343,7 +343,7 @@ TclX_BsearchObjCmd (ClientData clientData,
         valPtr = Tcl_NewStringObj (Tcl_DStringValue (&searchCB.lineBuf),
                                    -1);
         if (Tcl_ObjSetVar2(interp, objv[3], NULL, valPtr,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+                           TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valPtr);
             goto errorExit;
         }
@@ -367,7 +367,7 @@ TclX_BsearchObjCmd (ClientData clientData,
 void
 TclX_BsearchInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
                           "bsearch",
                           TclX_BsearchObjCmd, 
                           (ClientData) NULL,

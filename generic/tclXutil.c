@@ -325,17 +325,26 @@ TclX_GetOffsetFromObj (Tcl_Interp *interp, Tcl_Obj *objPtr, off_t *offsetPtr)
 int
 TclX_RelativeExpr (Tcl_Interp  *interp,
                    Tcl_Obj     *exprPtr,
-                   int          stringLen,
-                   int         *exprResultPtr)
+                   Tcl_Size     stringLen,
+                   Tcl_Size    *exprResultPtr)
 {
     char *exprStr, *buf;
-    int exprLen, exprStrLen, result;
+    Tcl_Size exprLen, exprStrLen;
+    int  result;
+    Tcl_Size wideResult;
     long longResult;
     char staticBuf [32];
 
-    if (exprPtr->typePtr == Tcl_GetObjType ("int")) {
-        if (Tcl_GetIntFromObj (interp, exprPtr, exprResultPtr) != TCL_OK)
+    if (0 && exprPtr->typePtr == Tcl_GetObjType ("int")) {
+        int intResult;
+        if (Tcl_GetIntFromObj (interp, exprPtr, &intResult) != TCL_OK)
             return TCL_ERROR;
+	*exprResultPtr = intResult;
+        return TCL_OK;
+    }
+    /* "endValue" references the last element, not the length, hench -1 below */
+    if (Tcl_GetIntForIndex(interp, exprPtr, (stringLen-1), &wideResult) == TCL_OK) {
+        *exprResultPtr = wideResult;
         return TCL_OK;
     }
 
@@ -350,7 +359,7 @@ TclX_RelativeExpr (Tcl_Interp  *interp,
         return TCL_OK;
     }
 
-    sprintf (staticBuf, "%d",
+    sprintf (staticBuf, "%" TCL_Z_MODIFIER "d",
              stringLen - ((exprStr [0] == 'e') ? 1 : 0));
     exprLen = strlen (staticBuf) + exprStrLen - 2;
 
@@ -762,7 +771,7 @@ TclX_WrongArgs (Tcl_Interp *interp, Tcl_Obj *commandNameObj, char *string)
 {
     char    *commandName;
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
-    int      commandLength;
+    Tcl_Size commandLength;
 
     commandName = Tcl_GetStringFromObj (commandNameObj, &commandLength);
 
@@ -833,7 +842,7 @@ TclX_IsNullObj (Tcl_Obj *objPtr)
 {
     static const Tcl_ObjType *listType = NULL;
     static const Tcl_ObjType *stringType = NULL;
-    int length;
+    Tcl_Size length;
     
     /*
      * Only get types once, as they must be static.
@@ -914,8 +923,8 @@ void
 TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
 {
     Tcl_Obj **saveObjv;
-    int saveObjc;
-    long flags = 0;
+    Tcl_Size  saveObjc;
+    long      flags = 0;
 
     if ((Tcl_ListObjGetElements (NULL, saveObjPtr, &saveObjc,
                                  &saveObjv) != TCL_OK) ||
@@ -947,7 +956,7 @@ TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
  * in conflict with other extensions.
  *
  * Parameters:
- *   o Like Tcl_CreateObjCommand
+ *   o Like Tcl_CreateObjCommand2
  *   o flags - Additional flags to control the behaviour of the procedure.
  *--------------------------------------------------------------------------
  */
@@ -955,7 +964,7 @@ TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
 int
 TclX_CreateObjCommand (Tcl_Interp        *interp,
                        char              *cmdName,
-                       Tcl_ObjCmdProc    *proc,
+                       Tcl_ObjCmdProc2   *proc,
                        ClientData         clientData,
                        Tcl_CmdDeleteProc *deleteProc,
                        int                flags)
@@ -970,13 +979,13 @@ TclX_CreateObjCommand (Tcl_Interp        *interp,
     if ((flags & TCLX_CMD_REDEFINE) ||
 	    !(Tcl_FindHashEntry(gTblPtr, cmdName) ||
 		    Tcl_FindHashEntry(cTblPtr, cmdName))) {
-	Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc);
+	Tcl_CreateObjCommand2(interp, cmdName, proc, clientData, deleteProc);
     }
     if (!(cmdName[0] == 't' && cmdName[1] == 'c' && cmdName[2] == 'l' &&
 	    cmdName[3] == 'x') && !(flags & TCLX_CMD_NOPREFIX)) {
 	char cmdnamebuf[80];
 	sprintf(cmdnamebuf, "tclx_%s", cmdName);
-	Tcl_CreateObjCommand(interp, cmdnamebuf, proc, clientData, deleteProc);
+	Tcl_CreateObjCommand2(interp, cmdnamebuf, proc, clientData, deleteProc);
     }
 
     return TCL_OK;

@@ -89,7 +89,7 @@ CmdTraceRoutine (ClientData    clientData,
 static int
 TclX_CmdtraceObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
-                     int objc,
+                     Tcl_Size objc,
                      Tcl_Obj *const objv[]);
 
 static void
@@ -304,7 +304,7 @@ TraceCallBack (Tcl_Interp *interp,
     sprintf (numBuf, "%d", level);
     Tcl_DStringAppendElement (&callback, numBuf);
 
-    sprintf (numBuf, "%d",  ((iPtr->varFramePtr == NULL) ? 0 : 
+    sprintf (numBuf, "%" TCL_Z_MODIFIER "d",  ((iPtr->varFramePtr == NULL) ? 0 : 
              iPtr->varFramePtr->level));
     Tcl_DStringAppendElement (&callback, numBuf);
 
@@ -386,7 +386,7 @@ CmdTraceRoutine (ClientData clientData,
 static int
 TclX_CmdtraceObjCmd (ClientData clientData,
                      Tcl_Interp *interp,
-                     int objc,
+                     Tcl_Size objc,
                      Tcl_Obj *const objv[])
 {
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;
@@ -570,7 +570,7 @@ TclX_DebugInit (Tcl_Interp *interp)
 
     Tcl_CallWhenDeleted (interp, DebugCleanUp, (ClientData) infoPtr);
 
-    Tcl_CreateObjCommand (interp, "cmdtrace",
+    Tcl_CreateObjCommand2 (interp, "cmdtrace",
                           TclX_CmdtraceObjCmd, 
                           (ClientData) infoPtr,
                           (Tcl_CmdDeleteProc*) NULL);

@@ -1,3 +1,20 @@
+2025-04-08  Brian Griffin <bgriffinfortytwo@gmail.com>
+	**** Porting to Tcl 9.0 ****
+
+	* TCLX 9.0.0
+	* updated tclconfig
+	* all tclx math functions use Tcl's builtin math functions.
+	* int -> Tcl_Size throughout (i.e. 32-bit to 64-bit sizes)
+	* chmod: default argument base changed from decimal to
+	*        octal, since a leading zero is nolong considered
+	*        octal in Tcl 9. Other radix forms are accepted as
+	*        well, e.g. 0d65. This change makes chmod more
+	*        closely compatible with unix chmod command.
+	* profile: not yet working
+	* tcllib: not yet working
+	* tests: 44 out of 46 tests are passing.
+	*        Tested only on linux.
+
 2012-11-07  Andreas Kupries  <andreask@activestate.com>
 
 	**** TCLX 8.4.1 RELEASE ****

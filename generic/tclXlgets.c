@@ -56,7 +56,7 @@ ReadListElement (Tcl_Interp  *interp,
 static int 
 TclX_LgetsObjCmd (ClientData  clientData, 
                  Tcl_Interp  *interp, 
-                 int          objc,
+                 Tcl_Size     objc,
                  Tcl_Obj     *const objv[]);
 
 
@@ -281,14 +281,14 @@ ReadListElement (Tcl_Interp  *interp,
 	     */
 
 	    case '\\': {
-		char bsChar;
-
-                bsChar = Tcl_Backslash(p, &numChars);
+		char bsChars[4];
+		Tcl_Size bsLen;
+                bsLen = Tcl_UtfBackslash(p, &numChars, bsChars);
                 if (openBraces > 0) {
                     p += (numChars - 1);  /* Advanced again at end of loop */
                 } else {
                     Tcl_AppendToObj (elemObjPtr, cpStart, (p - cpStart));
-                    Tcl_AppendToObj (elemObjPtr, &bsChar, 1);
+                    Tcl_AppendToObj (elemObjPtr, bsChars, bsLen);
                     p += (numChars - 1);
                     cpStart = p + 1;  /* already stored character */
                 }
@@ -408,7 +408,7 @@ ReadListElement (Tcl_Interp  *interp,
 static int 
 TclX_LgetsObjCmd (ClientData  clientData, 
                  Tcl_Interp  *interp, 
-                 int          objc,
+                 Tcl_Size     objc,
                  Tcl_Obj     *const objv[])
 {
     Tcl_Channel channel;
@@ -470,7 +470,7 @@ TclX_LgetsObjCmd (ClientData  clientData,
         int resultLen;
 
         if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+                           TCL_LEAVE_ERR_MSG) == NULL) {
             goto errorExit;
         }
 
@@ -512,7 +512,7 @@ TclX_LgetsObjCmd (ClientData  clientData,
          * FIX: Need functions to save/restore error state.
          */
         if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) != NULL) {
+                           TCL_LEAVE_ERR_MSG) != NULL) {
             Tcl_SetObjResult (interp, saveResult);  /* Restore old message */
         }
         Tcl_DecrRefCount (saveResult);
@@ -533,7 +533,7 @@ TclX_LgetsObjCmd (ClientData  clientData,
 void
 TclX_LgetsInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
                           "lgets",
                           TclX_LgetsObjCmd,
                           (ClientData) NULL,

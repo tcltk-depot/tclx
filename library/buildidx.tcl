@@ -149,7 +149,7 @@ namespace eval TclX {
         if ![cequal $tcl_platform(platform) "unix"] return
 
         file stat $libName statInfo
-        chmod $statInfo(mode) $idxName
+        chmod [format %o $statInfo(mode)] $idxName
         catch {
            chown [list $statInfo(uid) $statInfo(gid)] $idxName
         }

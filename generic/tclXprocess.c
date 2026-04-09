@@ -31,19 +31,19 @@
 static int 
 TclX_ExeclObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size objc,
                   Tcl_Obj *const objv[]);
 
 static int 
 TclX_ForkObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size objc,
                  Tcl_Obj *const objv[]);
 
 static int 
 TclX_WaitObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size objc,
                  Tcl_Obj *const objv[]);
 
 
@@ -56,7 +56,7 @@ TclX_WaitObjCmd (ClientData clientData,
 static int 
 TclX_ForkObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size objc,
                  Tcl_Obj *const objv[])
 {
     if (objc != 1)
@@ -74,7 +74,7 @@ TclX_ForkObjCmd (ClientData clientData,
 static int 
 TclX_ExeclObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size objc,
                   Tcl_Obj *const objv[])
 {
 #define STATIC_ARG_SIZE   12
@@ -82,7 +82,7 @@ TclX_ExeclObjCmd (ClientData clientData,
     char **argList = staticArgv;
     int nextArg = 1;
     char *argStr;
-    int argObjc;
+    Tcl_Size argObjc;
     Tcl_Obj **argObjv;
     char *path, *argv0 = NULL;
     int idx, status;
@@ -162,7 +162,7 @@ TclX_ExeclObjCmd (ClientData clientData,
 static int 
 TclX_WaitObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size objc,
                  Tcl_Obj *const objv[])
 {
     int idx, options = 0, pgroup = FALSE;
@@ -291,7 +291,7 @@ TclX_WaitObjCmd (ClientData clientData,
 void
 TclX_ProcessInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
                           "execl",
                           TclX_ExeclObjCmd,
                           (ClientData) NULL,

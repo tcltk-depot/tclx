@@ -266,6 +266,16 @@ if [cequal $tcl_platform(platform) unix] {
        set stat [catch {dup 100}]
        list $stat [lrange $errorCode 0 1]
     } {1 {POSIX EBADF}}
+
+    test dup-5.10 {dup tests} {
+	set stat [catch {dup 9Jack} foo]
+	list $stat $foo
+    } {1 {invalid integer file number "9Jack", expected unsigned integer or Tcl file id}}
+
+    test dup-5.11 {dup tests} {
+	set stat [catch {dup 18 offcourse} foo]
+	list $stat $foo
+    } {1 {the second argument, targetChannelId, is not allow when binding a file number to a Tcl channel}}
 }
 
 TestRemove DUP.TMP DUP2.TMP INCMDS.TMP OUTPUT.TMP

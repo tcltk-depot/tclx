@@ -32,25 +32,25 @@ static int   tclAppPatchlevel  = -1;
 static int 
 TclX_EchoObjCmd (ClientData clientData, 
                  Tcl_Interp *interp,
-                 int         objc,
+                 Tcl_Size         objc,
                  Tcl_Obj    *const objv[]);
 
 static int 
 TclX_InfoxObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
-                  int         objc,
+                  Tcl_Size         objc,
                   Tcl_Obj    *const objv[]);
 
 static int 
 TclX_LoopObjCmd (ClientData clientData, 
                  Tcl_Interp *interp,
-                 int         objc,
+                 Tcl_Size         objc,
                  Tcl_Obj    *const objv[]);
 
 static int
 SetLoopCounter (Tcl_Interp *interp,
                 char *varName,
-                int idx);
+                Tcl_Size idx);
 
 static int
 GlobalImport (Tcl_Interp *interp);
@@ -58,7 +58,7 @@ GlobalImport (Tcl_Interp *interp);
 static int
 TclX_Try_EvalObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
-                     int         objc,
+                     Tcl_Size         objc,
                      Tcl_Obj    *const objv[]);
 
 
@@ -118,14 +118,14 @@ TclX_SetAppInfo (int defaultValues,
 static int
 TclX_EchoObjCmd (ClientData dummy,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size objc,
                  Tcl_Obj *const objv[])
 {
-    int	  idx;
+    Tcl_Size	  idx;
     Tcl_Channel channel;
 #ifndef TCL_UTF_MAX
     char *stringPtr;
-    int stringPtrLen;
+    Tcl_Size stringPtrLen;
 #endif
 
     channel = TclX_GetOpenChannel (interp, "stdout", TCL_WRITABLE);
@@ -163,7 +163,7 @@ TclX_EchoObjCmd (ClientData dummy,
 static int
 TclX_InfoxObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size objc,
                   Tcl_Obj *const objv[])
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
@@ -317,11 +317,11 @@ TclX_InfoxObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
+SetLoopCounter (Tcl_Interp *interp, char *varName, Tcl_Size idx)
 {
     Tcl_Obj *iObj, *newVarObj;
 
-    iObj = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
+    iObj = Tcl_GetVar2Ex(interp, varName, NULL, 0);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
 	iObj = newVarObj = Tcl_NewLongObj (idx);
     } else {
@@ -330,7 +330,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 
     Tcl_SetLongObj (iObj, idx);
     if (Tcl_SetVar2Ex(interp, varName, NULL, iObj,
-	    TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+	    TCL_LEAVE_ERR_MSG) == NULL) {
 	if (newVarObj != NULL) {
 	    Tcl_DecrRefCount (newVarObj);
 	}
@@ -352,7 +352,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 static int
 TclX_LoopObjCmd (ClientData dummy,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size objc,
                  Tcl_Obj *const objv[])
 {
     int result = TCL_OK;
@@ -432,7 +432,8 @@ GlobalImport (Tcl_Interp *interp)
     Tcl_CmdInfo cmdInfo;
 #define globalObjc (4)
     Tcl_Obj *globalObjv [globalObjc];
-    int idx, code = TCL_OK;
+    Tcl_Size idx;
+    int code = TCL_OK;
 
     savedResult = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
 
@@ -450,11 +451,24 @@ GlobalImport (Tcl_Interp *interp)
     for (idx = 0; idx < globalObjc; idx++) {
         Tcl_IncrRefCount (globalObjv [idx]);
     }
+
+    switch (cmdInfo.isNativeObjectProc) {
+    case 1:
+      code = (*cmdInfo.objProc) (cmdInfo.objClientData,
+				 interp,
+				 globalObjc,
+				 globalObjv);
+      break;
+#if TCL_MAJOR_VERSION > 8
+    case 2:
+      code = (*cmdInfo.objProc2) (cmdInfo.objClientData2,
+				  interp,
+				  globalObjc,
+				  globalObjv);
+      break;
+#endif
+    }
     
-    code = (*cmdInfo.objProc) (cmdInfo.objClientData,
-                               interp,
-                               globalObjc,
-                               globalObjv);
     for (idx = 0; idx < globalObjc; idx++) {
         Tcl_DecrRefCount (globalObjv [idx]);
     }
@@ -483,7 +497,7 @@ GlobalImport (Tcl_Interp *interp)
 static int
 TclX_Try_EvalObjCmd (ClientData  dummy,
                      Tcl_Interp *interp,
-                     int         objc,
+                     Tcl_Size         objc,
                      Tcl_Obj *const objv[])
 {
     int code, code2;
@@ -553,25 +567,25 @@ TclX_Try_EvalObjCmd (ClientData  dummy,
 void
 TclX_GeneralInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
                           "echo",
                           TclX_EchoObjCmd,
                           (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand(interp, 
+    Tcl_CreateObjCommand2(interp, 
                          "infox",
                          TclX_InfoxObjCmd,
                          (ClientData) NULL,
                          (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand(interp, 
+    Tcl_CreateObjCommand2(interp, 
                          "loop",
                          TclX_LoopObjCmd,
                          (ClientData) NULL,
                          (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand(interp, 
+    Tcl_CreateObjCommand2(interp, 
                          "try_eval",
                          TclX_Try_EvalObjCmd,
                          (ClientData) NULL,

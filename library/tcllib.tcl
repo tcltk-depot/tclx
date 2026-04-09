@@ -36,7 +36,7 @@
 #------------------------------------------------------------------------------
 #
 
-#@package: TclX-libraries searchpath auto_load_file
+@package: TclX-libraries searchpath auto_load_file
 
 #------------------------------------------------------------------------------
 # searchpath:

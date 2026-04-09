@@ -32,6 +32,29 @@
 #endif
 
 /*
+ * Tcl 9 / Tcl 8 backward compatibility shim.
+ */
+#if TCL_MAJOR_VERSION < 9
+#  ifndef TCL_SIZE_MAX
+#    define TCL_SIZE_MAX INT_MAX
+#    ifndef Tcl_Size
+       typedef int Tcl_Size;
+#    endif
+#    define TCL_SIZE_MODIFIER ""
+#    define TCL_Z_MODIFIER    ""
+#  endif
+#  define Tcl_CreateObjCommand2 Tcl_CreateObjCommand
+#  define Tcl_ObjCmdProc2       Tcl_ObjCmdProc
+#  define Tcl_CreateObjTrace2   Tcl_CreateObjTrace
+#  define Tcl_CmdObjTraceProc2  Tcl_CmdObjTraceProc
+#  define Tcl_GetIntForIndex    TclGetIntForIndex
+#else
+#  ifndef TCL_RESULT_SIZE
+#    define TCL_RESULT_SIZE 200
+#  endif
+#endif
+
+/*
  * Internal interp flags compatibility - removed in Tcl 8.5 sources.
  */
 #ifndef ERR_IN_PROGRESS
@@ -209,7 +232,7 @@ typedef int
 
 extern int
 TclX_CreateObjCommand (Tcl_Interp* interp, char* cmdName,
-                       Tcl_ObjCmdProc *proc, ClientData clientData,
+                       Tcl_ObjCmdProc2 *proc, ClientData clientData,
                        Tcl_CmdDeleteProc *deleteProc, int flags);
 
 extern void *
@@ -282,8 +305,8 @@ TclX_GetOffsetFromObj (Tcl_Interp *interp,
 extern int
 TclX_RelativeExpr (Tcl_Interp  *interp,
                    Tcl_Obj     *exprPtr,
-                   int          stringLen,
-                   int         *exprResultPtr);
+                   Tcl_Size     stringLen,
+                   Tcl_Size    *exprResultPtr);
 
 extern int
 TclX_SetChannelOption (Tcl_Interp  *interp,

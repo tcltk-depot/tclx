@@ -33,7 +33,7 @@ DupFileChannel (Tcl_Interp *interp,
 static int
 TclX_DupObjCmd (ClientData   clientData,
                 Tcl_Interp  *interp,
-                int          objc,
+                Tcl_Size     objc,
                 Tcl_Obj     *const objv[]);
 
 
@@ -57,7 +57,7 @@ DupChannelOptions (Tcl_Interp *interp,
 {
     Tcl_DString strValues;
     const char *option, *value, **optArgv = NULL;
-    int optArgc, idx;
+    Tcl_Size optArgc, idx;
 
     Tcl_DStringInit (&strValues);
 
@@ -192,11 +192,11 @@ DupFileChannel (Tcl_Interp *interp, char *srcChannelId, char *targetChannelId)
 static int
 TclX_DupObjCmd (ClientData clientData,
                 Tcl_Interp *interp,
-                int objc,
+                Tcl_Size objc,
                 Tcl_Obj *const objv[])
 {
     Tcl_Channel newChannel;
-    int bindFnum, fnum;
+    int fnum;
     char *srcChannelId, *targetChannelId;
 
     if ((objc < 2) || (objc > 3)) {
@@ -208,24 +208,22 @@ TclX_DupObjCmd (ClientData clientData,
      * If a number is supplied, bind it to a file handle rather than doing
      * a dup.
      */
-    if (objv [1]->typePtr == Tcl_GetObjType ("int")) {
-        bindFnum = TRUE;
-    } else {
-        srcChannelId = Tcl_GetStringFromObj (objv [1], NULL);
-        if (ISDIGIT (srcChannelId [0])) {
-            if (Tcl_ConvertToType (interp, objv [1],
-                                   Tcl_GetObjType ("int")) != TCL_OK)
-                goto badFnum;
-            bindFnum = TRUE;
-        } else {
-            bindFnum = FALSE;
-        }
-    }
-    if (bindFnum) {
-        if (objc != 2)
-            goto bind2ndArg;
-        if (Tcl_GetIntFromObj (interp, objv [1], &fnum) != TCL_OK)
+    srcChannelId = Tcl_GetStringFromObj (objv [1], NULL);
+    if (ISDIGIT (srcChannelId [0])) {
+        if (Tcl_GetIntFromObj (interp, objv [1], &fnum) != TCL_OK) {
+	    Tcl_ResetResult (interp);
+	    TclX_AppendObjResult (interp, "invalid integer file number \"",
+				  Tcl_GetStringFromObj (objv [1], NULL),
+				  "\", expected unsigned integer or Tcl file id",
+				  (char *) NULL);
             return TCL_ERROR;
+	}
+	if (objc != 2) {
+	    TclX_AppendObjResult (interp, "the second argument, targetChannelId, ",
+				  "is not allow when binding a file number to ",
+				  "a Tcl channel", (char *) NULL);
+	    return TCL_ERROR;
+	}
         newChannel = TclXOSBindOpenFile (interp,  fnum);
     } else {
         if (objc > 2) {
@@ -237,27 +235,14 @@ TclX_DupObjCmd (ClientData clientData,
                                      srcChannelId,
                                      targetChannelId);
     }
-    if (newChannel == NULL)
-        return TCL_ERROR;
+    if (newChannel == NULL) {
+      return TCL_ERROR;
+    }
 
     Tcl_RegisterChannel (interp, newChannel);
     Tcl_SetStringObj (Tcl_GetObjResult (interp),
                       Tcl_GetChannelName (newChannel), -1);
     return TCL_OK;
-
-  badFnum:
-    Tcl_ResetResult (interp);
-    TclX_AppendObjResult (interp, "invalid integer file number \"",
-                          Tcl_GetStringFromObj (objv [1], NULL),
-                          "\", expected unsigned integer or Tcl file id",
-                          (char *) NULL);
-    return TCL_ERROR;
-
-  bind2ndArg:
-    TclX_AppendObjResult (interp, "the second argument, targetChannelId, ",
-                          "is not allow when binding a file number to ",
-                          "a Tcl channel", (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -271,7 +256,7 @@ TclX_DupObjCmd (ClientData clientData,
 void
 TclX_DupInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
 			  "dup",
 			  TclX_DupObjCmd, 
                           (ClientData) NULL,

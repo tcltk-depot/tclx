@@ -38,20 +38,20 @@ ConvSymMode (Tcl_Interp  *interp,
 static int 
 TclX_ChmodObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
-                  int objc,
-                  Tcl_Obj *const objv[]);
+                  Tcl_Size objc,
+                  Tcl_Obj *const *objv);
 
 static int 
 TclX_ChownObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
-                  int objc,
-                  Tcl_Obj *const objv[]);
+                  Tcl_Size objc,
+                  Tcl_Obj *const *objv);
 
 static int 
 TclX_ChgrpObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
-                  int objc,
-                  Tcl_Obj *const objv[]);
+                  Tcl_Size objc,
+                  Tcl_Obj *const *objv);
 
 
 /*-----------------------------------------------------------------------------
@@ -306,9 +306,10 @@ ChmodFileIdObj (Tcl_Interp *interp, modeInfo_t modeInfo, Tcl_Obj *fileIdObj)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const *objv)
 {
-    int           objIdx, idx, fileObjc, fileIds, result;
+    Tcl_Size      objIdx, idx, fileObjc;
+    int           fileIds, result;
     modeInfo_t    modeInfo;
     Tcl_Obj     **fileObjv;
     char         *fileIdsString;
@@ -333,15 +334,55 @@ TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 	return TclX_WrongArgs (interp, objv [0], "[-fileid] mode filelist");
 
     modeString = Tcl_GetStringFromObj (objv [objIdx], NULL);
+#if TCL_MAJOR_VERSION > 8
+    /*
+     * Tcl 9 treats leading-0 integers as decimal, not octal.  We must
+     * parse octal manually and accept the explicit 0d prefix for decimal.
+     */
+    if (modeString[0] == '0' && modeString[1] == 'd') {
+
+      /* Allow special case for explicit decimal representation */
+      if (Tcl_GetIntFromObj (interp, objv [objIdx], &modeBits) != TCL_OK) {
+	return TCL_ERROR;
+      }
+      modeInfo.absMode = modeBits;
+      modeInfo.symMode = NULL;
+
+    } else if (ISDIGIT (modeString[0])) {
+
+      /* parse out the octal number */
+        int i = 0;
+	modeBits = 0;
+	while (modeString[i]) {
+	    if ((!ISDIGIT(modeString[i])) || modeString[i] > '7') {
+	        return TCL_ERROR;
+	    }
+	    modeBits = (modeBits << 3 | (0x7 & (modeString[i] - '0')));
+	    i++;
+	}
+	modeInfo.absMode = modeBits;
+        modeInfo.symMode = NULL;
+
+    } else {
+        /* String mode */
+        modeInfo.absMode = 0;
+        modeInfo.symMode = modeString;
+    }
+#else
+    /*
+     * Tcl 8: Tcl_GetIntFromObj handles 0-prefixed integers as octal.
+     */
     if (ISDIGIT (modeString[0])) {
-        if (Tcl_GetIntFromObj (interp, objv [objIdx], &modeBits) 
+        if (Tcl_GetIntFromObj (interp, objv [objIdx], &modeBits)
 	  != TCL_OK)
             return TCL_ERROR;
 	modeInfo.absMode = modeBits;
         modeInfo.symMode = NULL;
     } else {
+        modeInfo.absMode = 0;
         modeInfo.symMode = modeString;
     }
+#endif
 
     if (Tcl_ListObjGetElements (interp, objv [objIdx + 1], &fileObjc,
                        &fileObjv) != TCL_OK)
@@ -371,14 +412,15 @@ TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ChownObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+TclX_ChownObjCmd (ClientData clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const *objv)
 {
-    int        objIdx, ownerObjc, fileIds;
+    Tcl_Size   objIdx, ownerObjc;
+    int        fileIds;
     Tcl_Obj  **ownerObjv = NULL;
     unsigned   options;
     char      *fileIdsSwitch;
     char      *owner, *group;
-    int        groupStrLen;
+    Tcl_Size   groupStrLen;
 
 
     /*
@@ -455,7 +497,7 @@ TclX_ChownObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ChgrpObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+TclX_ChgrpObjCmd (ClientData clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const *objv)
 {
     int        objIdx, fileIds;
     char      *fileIdsSwitch, *groupString;
@@ -505,19 +547,19 @@ TclX_ChgrpObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 void
 TclX_ChmodInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
 			  "chgrp",
 			  TclX_ChgrpObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "chmod",
 			  TclX_ChmodObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
                           "chown",
 			  TclX_ChownObjCmd,
                           (ClientData) NULL,

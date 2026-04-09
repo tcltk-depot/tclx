@@ -38,19 +38,19 @@ ReadDirCallback (Tcl_Interp  *interp,
 static int 
 TclX_PipeObjCmd (ClientData  clientData,
                  Tcl_Interp *interp,
-                 int         objc,
+                 Tcl_Size    objc,
                  Tcl_Obj    *const objv[]);
 
 static int
 TclX_FtruncateObjCmd (ClientData  clientData, 
                       Tcl_Interp *interp, 
-                      int         objc,
+                      Tcl_Size    objc,
                       Tcl_Obj    *const objv[]);
 
 static int
 TclX_ReaddirObjCmd (ClientData clientData,
                     Tcl_Interp *interp,
-                    int         objc,
+                    Tcl_Size    objc,
                     Tcl_Obj    *const objv[]);
 
 
@@ -66,7 +66,7 @@ TclX_ReaddirObjCmd (ClientData clientData,
 static int 
 TclX_PipeObjCmd (ClientData  clientData,
                  Tcl_Interp *interp,
-                 int         objc,
+                 Tcl_Size    objc,
                  Tcl_Obj    *const objv[])
 {
     Tcl_Channel   channels [2];
@@ -87,12 +87,12 @@ TclX_PipeObjCmd (ClientData  clientData,
                               channelNames [1], (char *) NULL);
     } else {
         if (Tcl_ObjSetVar2(interp, objv[1], NULL, Tcl_NewStringObj(channelNames [0], -1),
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL)
+                           TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
         if (Tcl_ObjSetVar2(interp, objv[2], NULL,
                            Tcl_NewStringObj(channelNames [1], -1),
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL)
+                           TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
     }
 
@@ -159,10 +159,11 @@ TruncateByPath (Tcl_Interp *interp, char *filePath, off_t newSize)
 static int
 TclX_FtruncateObjCmd (ClientData clientData,
                       Tcl_Interp *interp,
-                      int objc,
+                      Tcl_Size objc,
                       Tcl_Obj *const objv[])
 {
-    int           objIdx, fileIds;
+    Tcl_Size      objIdx;
+    int           fileIds;
     off_t         newSize;
     long          convSize;
     Tcl_Channel   channel;
@@ -246,7 +247,7 @@ ReadDirCallback (Tcl_Interp *interp,
 static int
 TclX_ReaddirObjCmd (ClientData clientData,
                     Tcl_Interp *interp,
-                    int objc,
+                    Tcl_Size objc,
                     Tcl_Obj *const objv[])
 {
     Tcl_DString  pathBuf;
@@ -254,7 +255,7 @@ TclX_ReaddirObjCmd (ClientData clientData,
     int          hidden, status;
     Tcl_Obj     *fileListObj;
     char        *switchString;
-    int          dirPathLen;
+    Tcl_Size     dirPathLen;
     
     if ((objc < 2) || (objc > 3))
         return TclX_WrongArgs (interp, objv [0], "?-hidden? dirPath");
@@ -310,19 +311,19 @@ TclX_ReaddirObjCmd (ClientData clientData,
 void
 TclX_FilecmdsInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "pipe",
 			  TclX_PipeObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "ftruncate",
 			  TclX_FtruncateObjCmd,
 			  (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
                           "readdir",
 			  TclX_ReaddirObjCmd,
                           (ClientData) NULL,

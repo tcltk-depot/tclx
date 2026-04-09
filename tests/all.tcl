@@ -46,7 +46,7 @@ if {[llength $::tcltest::matchFiles] > 0} {
 set timeCmd {clock format [clock seconds]}
 puts stdout "Tests began at [eval $timeCmd]"
 
-package require Tclx 8.6
+package require Tclx 8.6-
 
 
 # Hook to determine if any of the tests failed. Then we can exit with

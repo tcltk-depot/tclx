@@ -326,13 +326,13 @@ SignalCmdCleanUp (ClientData  clientData,
 static int
 TclX_SignalObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
-                   int          objc,
+                   Tcl_Size objc,
                    Tcl_Obj     *const objv[]);
 
 static int
 TclX_KillObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
-                 int          objc,
+                 Tcl_Size objc,
                  Tcl_Obj     *const objv[]);
 
 
@@ -930,7 +930,7 @@ ParseSignalList (Tcl_Interp    *interp,
 {
     Tcl_Obj **signalObjv;
     char     *signalStr;
-    int       signalObjc, signalNum, idx;
+    Tcl_Size  signalObjc, signalNum, idx;
 
     if (Tcl_ListObjGetElements (interp, signalListObjPtr,
                                 &signalObjc, &signalObjv) != TCL_OK)
@@ -1134,7 +1134,7 @@ ProcessSignalListEntry (Tcl_Interp *interp,
                         Tcl_Obj    *stateObjPtr)
 {
     Tcl_Obj **stateObjv;
-    int stateObjc;
+    Tcl_Size stateObjc;
     char *actionStr, *cmdStr;
     int signalNum, blocked;
     signalProcPtr_t  actionFunc = NULL;
@@ -1280,7 +1280,7 @@ static int
 SetSignalStates (Tcl_Interp *interp, Tcl_Obj *sigStatesObjPtr)
 {
     Tcl_Obj *keysListObj, **keysObjv, *stateObjPtr;
-    int keysObjc, idx;
+    Tcl_Size keysObjc, idx;
     char *signalName;
 
     if (TclX_KeyedListGetKeys (interp, sigStatesObjPtr, NULL,
@@ -1310,7 +1310,7 @@ SetSignalStates (Tcl_Interp *interp, Tcl_Obj *sigStatesObjPtr)
 static int
 TclX_SignalObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
-                   int          objc,
+                   Tcl_Size objc,
                    Tcl_Obj     *const objv[])
 {
     unsigned char signals [MAXSIG];
@@ -1450,12 +1450,13 @@ TclX_SignalObjCmd (ClientData   clientData,
 static int
 TclX_KillObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
-                 int          objc,
+                 Tcl_Size objc,
                  Tcl_Obj     *const objv[])
 {
-    int    signalNum, nextArg, idx, procId, procObjc;
-    int    pgroup = FALSE;
-    char  *cmdStr, *argStr;
+    int       signalNum, procId;
+    Tcl_Size  nextArg, idx, procObjc;
+    int       pgroup = FALSE;
+    char     *cmdStr, *argStr;
     Tcl_Obj **procObjv;
     
 #ifdef SIGTERM
@@ -1650,9 +1651,9 @@ TclX_SignalInit (Tcl_Interp *interp)
 
     Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);
 
-    Tcl_CreateObjCommand (interp, "signal", TclX_SignalObjCmd,
+    Tcl_CreateObjCommand2 (interp, "signal", TclX_SignalObjCmd,
                           (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "kill", TclX_KillObjCmd,
+    Tcl_CreateObjCommand2 (interp, "kill", TclX_KillObjCmd,
                           (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 }
 

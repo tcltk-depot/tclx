@@ -19,15 +19,28 @@
 #@package: TclX-stringfile_functions read_file write_file
 
 proc read_file {fileName args} {
-    if {$fileName == "-nonewline"} {
+    set flag {}
+    set otherargs {}
+    if {$fileName in {-nonewline nonewline}} {
         set flag $fileName
         set fileName [lvarpop args]
     } else {
-        set flag {}
+	foreach arg $args {
+	    switch -- $arg {
+		nonewline -
+		-nonewline {
+		    set flag -nonewline
+		}
+		default {
+		    lappend otherargs $arg
+		}
+	    }
+	}
+	set args $otherargs
     }
     set fp [open $fileName]
     try_eval {
-        set result [eval read $flag $fp $args]
+        set result [read {*}$flag $fp {*}$args]
     } {} {
         close $fp
     }

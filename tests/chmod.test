@@ -30,12 +30,23 @@ if [cequal $tcl_platform(platform) windows] {
     return
 }
 
+# Tcl 9 treats leading-0 as decimal, so chmod must parse octal manually.
+# permissiveOctal: tests using 0d prefix (Tcl 9 only)
+# strictOctal: tests where bare integers are NOT octal (Tcl 9 only)
+if {[package vcompare [package provide Tcl] 9.0] >= 0} {
+    testConstraint permissiveOctal 1
+    testConstraint strictOctal 1
+} else {
+    testConstraint permissiveOctal 0
+    testConstraint strictOctal 0
+}
+
 #-----------------------------------------------------------------------------
 # This routine to the the mode of a file.  It is returned formated in octal.
  
 proc GetMode {filename} {
     file stat $filename stat
-    return [format "%o" [expr {$stat(mode) & 07777}]]
+    return [format "%o" [expr {$stat(mode) & 0o7777}]]
 }
 
 #-----------------------------------------------------------------------------
@@ -210,102 +221,114 @@ test chmod-1.14 {chmod absolute mode tests} {need_fchmod} {
     GetMode CHMOD.TMP
 } {4111}
 
-test chmod-2.1 {chmod absolute integer mode tests} {
+test chmod-2.1.0 {chmod absolute integer mode tests} permissiveOctal {
+    chmod     0 {CHMOD.TMP CHMOD2.TMP}
+    chmod  0d65 {CHMOD.TMP CHMOD2.TMP}
+    list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
+} {101 101}
+
+test chmod-2.1.1 {chmod absolute integer mode tests} strictOctal {
     chmod   0 {CHMOD.TMP CHMOD2.TMP}
     chmod  65 {CHMOD.TMP CHMOD2.TMP}
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
-} {101 101}
+} {65 65}
 
-test chmod-2.2 {chmod absolute integer mode tests} {
-    chmod 0 {CHMOD.TMP CHMOD2.TMP}
-    chmod 8 {CHMOD.TMP CHMOD2.TMP}
+test chmod-2.2 {chmod absolute integer mode tests} permissiveOctal {
+    chmod   0 {CHMOD.TMP CHMOD2.TMP}
+    chmod 0d8 {CHMOD.TMP CHMOD2.TMP}
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {10 10}
 
-test chmod-2.3 {chmod absolute integer mode tests} {
-    chmod   0 {CHMOD.TMP CHMOD2.TMP}
-    chmod 511 {CHMOD.TMP CHMOD2.TMP}
+test chmod-2.3.0 {chmod absolute integer mode tests} permissiveOctal {
+    chmod     0 {CHMOD.TMP CHMOD2.TMP}
+    chmod 0d511 {CHMOD.TMP CHMOD2.TMP}
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {777 777}
 
-test chmod-2.4 {chmod absolute integer mode tests} {
-    chmod   0 {CHMOD.TMP CHMOD2.TMP}
-    chmod 438 {CHMOD.TMP CHMOD2.TMP}
+test chmod-2.3.1 {chmod absolute integer mode tests} strictOctal {
+    chmod     0 {CHMOD.TMP CHMOD2.TMP}
+    chmod 0d511 {CHMOD.TMP CHMOD2.TMP}
+    list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
+} {777 777}
+
+test chmod-2.4 {chmod absolute integer mode tests} permissiveOctal {
+    chmod     0 {CHMOD.TMP CHMOD2.TMP}
+    chmod 0d438 {CHMOD.TMP CHMOD2.TMP}
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {666 666}
 
-test chmod-2.5 {chmod absolute integer mode tests} {
-    chmod   0 {CHMOD.TMP CHMOD2.TMP}
-    chmod 453 {CHMOD.TMP  CHMOD2.TMP}
+test chmod-2.5 {chmod absolute integer mode tests} permissiveOctal {
+    chmod     0 {CHMOD.TMP CHMOD2.TMP}
+    chmod 0d453 {CHMOD.TMP  CHMOD2.TMP}
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {705 705}
 
-test chmod-2.6 {chmod absolute integer mode tests} {
-    chmod 0    CHMOD.TMP
-    chmod 2121 CHMOD.TMP
+test chmod-2.6 {chmod absolute integer mode tests} permissiveOctal {
+    chmod      0 CHMOD.TMP
+    chmod 0d2121 CHMOD.TMP
     GetMode    CHMOD.TMP
 } {4111}
 
-test chmod-2.7 {chmod absolute integer mode tests} {need_fchmod} {
+test chmod-2.7 {chmod absolute integer mode tests} {need_fchmod permissiveOctal} {
     chmod 0600 {CHMOD.TMP CHMOD2.TMP}
     set fh1 [open CHMOD.TMP w]
     set fh2 [open CHMOD2.TMP w]
-    chmod -fileid   0 [list $fh1 $fh2]
-    chmod -fileid  65 [list $fh1 $fh2]
+    chmod -fileid     0 [list $fh1 $fh2]
+    chmod -fileid  0d65 [list $fh1 $fh2]
     close $fh1
     close $fh2
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {101 101}
 
-test chmod-2.8 {chmod absolute integer mode tests} {need_fchmod} {
+test chmod-2.8 {chmod absolute integer mode tests} {need_fchmod permissiveOctal} {
     chmod 0600 {CHMOD.TMP CHMOD2.TMP}
     set fh1 [open CHMOD.TMP w]
     set fh2 [open CHMOD2.TMP w]
-    chmod -fileid 0 [list $fh1 $fh2]
-    chmod -fileid 8 [list $fh1 $fh2]
+    chmod -fileid  0 [list $fh1 $fh2]
+    chmod -fileid 10 [list $fh1 $fh2]
     close $fh1
     close $fh2
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {10 10}
 
-test chmod-2.9 {chmod absolute integer mode tests} {need_fchmod} {
+test chmod-2.9 {chmod absolute integer mode tests} {need_fchmod permissiveOctal} {
     chmod 0600 {CHMOD.TMP CHMOD2.TMP}
     set fh1 [open CHMOD.TMP w]
     set fh2 [open CHMOD2.TMP w]
     chmod -fileid   0 [list $fh1 $fh2]
-    chmod -fileid 511 [list $fh1 $fh2]
+    chmod -fileid 777 [list $fh1 $fh2]
     close $fh1
     close $fh2
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {777 777}
 
-test chmod-2.10 {chmod absolute integer mode tests} {need_fchmod} {
+test chmod-2.10 {chmod absolute integer mode tests} {need_fchmod permissiveOctal} {
     chmod 0600 {CHMOD.TMP CHMOD2.TMP}
     set fh1 [open CHMOD.TMP w]
     set fh2 [open CHMOD2.TMP w]
-    chmod -fileid   0 [list $fh1 $fh2]
-    chmod -fileid 438 [list $fh1 $fh2]
+    chmod -fileid     0 [list $fh1 $fh2]
+    chmod -fileid 0d438 [list $fh1 $fh2]
     close $fh1
     close $fh2
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {666 666}
 
-test chmod-2.11 {chmod absolute integer mode tests} {need_fchmod} {
+test chmod-2.11 {chmod absolute integer mode tests} {need_fchmod permissiveOctal} {
     chmod 0600 {CHMOD.TMP CHMOD2.TMP}
     set fh1 [open CHMOD.TMP w]
     set fh2 [open CHMOD2.TMP w]
-    chmod -fileid   0 [list $fh1 $fh2]
-    chmod -fileid 453 [list $fh1 $fh2]
+    chmod -fileid     0 [list $fh1 $fh2]
+    chmod -fileid 0d453 [list $fh1 $fh2]
     close $fh1
     close $fh2
     list [GetMode CHMOD.TMP] [GetMode CHMOD2.TMP]
 } {705 705}
 
-test chmod-2.12 {chmod absolute integer mode tests} {need_fchmod} {
+test chmod-2.12 {chmod absolute integer mode tests} {need_fchmod permissiveOctal} {
     chmod 0600 {CHMOD.TMP CHMOD2.TMP}
     set fh [open CHMOD.TMP w]
-    chmod -fileid 0    $fh
-    chmod -fileid 2121 $fh
+    chmod -fileid   0    $fh
+    chmod -fileid 0d2121 $fh
     close $fh
     GetMode CHMOD.TMP
 } {4111}

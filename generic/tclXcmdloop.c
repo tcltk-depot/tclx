@@ -71,7 +71,7 @@ AsyncCommandHandlerDelete (ClientData clientData);
 static int 
 TclX_CommandloopObjCmd (ClientData clientData, 
                         Tcl_Interp *interp,
-                        int objc,
+                        Tcl_Size objc,
                         Tcl_Obj *const objv[]);
 
 /*-----------------------------------------------------------------------------
@@ -665,7 +665,7 @@ TclX_CommandLoop (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CommandloopObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+TclX_CommandloopObjCmd (ClientData clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[])
 {
     int options = 0, async = FALSE, argIdx, interactive;
     char *argStr,  *endCommand = NULL;
@@ -757,7 +757,7 @@ TclX_CommandloopObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl
 void
 TclX_CmdloopInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
                           "commandloop",
                           TclX_CommandloopObjCmd, 
                           (ClientData) NULL,

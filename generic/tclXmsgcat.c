@@ -41,19 +41,19 @@ CatOpFailedObj (Tcl_Interp *interp,
 static int
 TclX_CatopenObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
-                    int         objc,
+                    Tcl_Size    objc,
                     Tcl_Obj   *const objv[]);
 
 static int
 TclX_CatgetsObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
-                    int         objc,
+                    Tcl_Size    objc,
                     Tcl_Obj   *const objv[]);
 
 static int
 TclX_CatcloseObjCmd (ClientData  clientData,
                      Tcl_Interp *interp,
-                     int         objc,
+                     Tcl_Size    objc,
                      Tcl_Obj   *const objv[]);
 
 static void
@@ -171,7 +171,7 @@ CatOpFailedObj (Tcl_Interp *interp,
 static int
 TclX_CatopenObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
-                    int         objc,
+                    Tcl_Size    objc,
                     Tcl_Obj   *const objv[])
 {
     int      fail;
@@ -211,7 +211,7 @@ TclX_CatopenObjCmd (ClientData  clientData,
 static int
 TclX_CatgetsObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
-                    int         objc,
+                    Tcl_Size    objc,
                     Tcl_Obj   *const objv[])
 {
     nl_catd   *catDescPtr;
@@ -266,7 +266,7 @@ TclX_CatgetsObjCmd (ClientData  clientData,
 static int
 TclX_CatcloseObjCmd (ClientData  clientData,
                      Tcl_Interp *interp,
-                     int         objc,
+                     Tcl_Size    objc,
                      Tcl_Obj   *const objv[])
 {
     int          fail;
@@ -368,19 +368,19 @@ TclX_MsgCatInit (Tcl_Interp *interp)
      * Initialize the commands.
      */
 
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
 			  "catopen",
 			  TclX_CatopenObjCmd, 
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 		          "catgets", 
 			  TclX_CatgetsObjCmd, 
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
 			  "catclose",
 			  TclX_CatcloseObjCmd,
                           (ClientData) NULL,

@@ -20,6 +20,8 @@ if {[cequal [info procs Test] {}]} {
     source [file join [file dirname [info script]] testlib.tcl]
 }
 
+set isTcl9 [expr {[package vcompare [package provide Tcl] 9.0] >= 0}]
+
 random seed 100
 
 for {set i 0} {$i < 100} {set i [expr $i+1]} {
@@ -63,21 +65,47 @@ Test math-2.4.1 {max tests} {
     max -68.7
 } 0 -68.7
 
-Test math-2.4.2 {max tests} {
-    max -68.7 0x200 010
-} 0 0x200
+if {$isTcl9} {
+    Test math-2.4.2 {max tests} {
+        max -68.7 0x200 0o10
+    } 0 512
+} else {
+    Test math-2.4.2 {max tests} {
+        max -68.7 0x200 010
+    } 0 0x200
+}
 
-Test math-2.4.3 {max tests} {
-    max 668e7 0x200 010
-} 0 668e7
+if {$isTcl9} {
+    Test math-2.4.3 {max tests} {
+        max 668e7 0x200 0o10
+    } 0 6680000000.0
+} else {
+    Test math-2.4.3 {max tests} {
+        max 668e7 0x200 010
+    } 0 668e7
+}
 
-Test math-2.5 {max tests} {
-    max
-} 1 {wrong # args: max num1 ?..numN?}
+if {$isTcl9} {
+    Test math-2.5 {max tests} {
+        max
+    } 1 {not enough arguments for math function "max"}
+} else {
+    Test math-2.5 {max tests} {
+        max
+    } 1 {wrong # args: max num1 ?..numN?}
+}
 
-Test math-2.6 {max tests} {
-    max 1 2 3 foo
-} 1 {expected floating-point number but got "foo"}
+if {$isTcl9} {
+    Test math-2.6 {max tests} {
+        max 1 2 3 foo
+    } 1 {invalid bareword "foo"
+in expression "max(1,2,3,foo)";
+should be "$foo" or "{foo}" or "foo(...)" or ...}
+} else {
+    Test math-2.6 {max tests} {
+        max 1 2 3 foo
+    } 1 {expected floating-point number but got "foo"}
+}
 
 Test math-3.1 {min tests} {
     min 1 2 4 3
@@ -99,17 +127,37 @@ Test math-3.3.1 {min tests} {
     min 5 0x200 010
 } 0 5
 
-Test math-3.3.2 {min tests} {
-    min 5e10 0x200 010
-} 0 010
+if {$isTcl9} {
+    Test math-3.3.2 {min tests} {
+        min 5e10 0x200 0o10
+    } 0 8
+} else {
+    Test math-3.3.2 {min tests} {
+        min 5e10 0x200 010
+    } 0 010
+}
 
-Test math-3.4 {min tests} {
-    min
-} 1 {wrong # args: min num1 ?..numN?}
+if {$isTcl9} {
+    Test math-3.4 {min tests} {
+        min
+    } 1 {not enough arguments for math function "min"}
+} else {
+    Test math-3.4 {min tests} {
+        min
+    } 1 {wrong # args: min num1 ?..numN?}
+}
 
-Test math-3.5 {min tests} {
-    min 1 2 3 foo
-} 1 {expected floating-point number but got "foo"}
+if {$isTcl9} {
+    Test math-3.5 {min tests} {
+        min 1 2 3 foo
+    } 1 {invalid bareword "foo"
+in expression "min(1,2,3,foo)";
+should be "$foo" or "{foo}" or "foo(...)" or ...}
+} else {
+    Test math-3.5 {min tests} {
+        min 1 2 3 foo
+    } 1 {expected floating-point number but got "foo"}
+}
 
 
 Test math-4.1 {max function tests} {

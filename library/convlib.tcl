@@ -44,11 +44,11 @@ namespace eval TclX {
             if {!([cequal $hdr {# Tcl autoload index file, version 2.0}] ||
                 [cequal $hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}])} {
                     error "can only convert version 2.0 Tcl auto-load files"
-                }
-            set dir [file dirname $tclIndex]  ;# Expected by the script.
-            eval [read $tclIndexFH]
-        }  {} {
-            close $tclIndexFH
+            }
+	    set dir [file dirname $tclIndex]  ;# Expected by the script.
+	    eval [read $tclIndexFH]
+	} {} {
+	    close $tclIndexFH
         }
         foreach procName [array names auto_index] {
             if ![string match "source *" $auto_index($procName)] {
@@ -57,7 +57,10 @@ namespace eval TclX {
                 set allOK 0
                 continue
             }
-            set filePath [lindex $auto_index($procName) 1]
+	    # If the "source" command includes the -encoding options,
+	    # skip over it to find the filePath
+	    set ix [expr {[string match "-enc*" [lindex $auto_index($procName) 1]] ? 3 : 1}]
+            set filePath [lindex $auto_index($procName) $ix]
             set fileName [file tail $filePath] 
             if {[lsearch $ignore $fileName] >= 0} continue
             
@@ -76,6 +79,7 @@ namespace eval TclX {
 # list
 
 proc convert_lib {tclIndex packageLib {ignore {}}} {
+    puts [list convert_lib $tclIndex $packageLib $ignore]
     if {[file tail $tclIndex] != "tclIndex"} {
         error "Tail file name must be `tclIndex': $tclIndex"}
     if ![file readable $tclIndex] {

@@ -83,13 +83,13 @@ ScanContextCopyFile (Tcl_Interp  *interp,
 static int
 TclX_ScancontextObjCmd (ClientData  clientData,
                         Tcl_Interp *interp,
-                        int         objc,
+                        Tcl_Size    objc,
                         Tcl_Obj    *const objv[]);
 
 static int
 TclX_ScanmatchObjCmd (ClientData  clientData,
                       Tcl_Interp *interp,
-                      int         objc,
+                      Tcl_Size    objc,
                       Tcl_Obj    *const objv[]);
 
 static void
@@ -118,7 +118,7 @@ ScanFileCloseHandler (ClientData clientData);
 static int
 TclX_ScanfileObjCmd (ClientData  clientData,
                      Tcl_Interp *interp,
-                     int         objc,
+                     Tcl_Size    objc,
                      Tcl_Obj    *const objv[]);
 
 static void
@@ -330,7 +330,7 @@ ScanContextCopyFile (Tcl_Interp *interp,
 static int
 TclX_ScancontextObjCmd (ClientData clientData,
                         Tcl_Interp *interp,
-                        int objc,
+                        Tcl_Size objc,
                         Tcl_Obj *const objv[])
 {
     char *subCommand;
@@ -393,12 +393,12 @@ TclX_ScancontextObjCmd (ClientData clientData,
 static int
 TclX_ScanmatchObjCmd (ClientData clientData,
                       Tcl_Interp *interp,
-                      int objc, Tcl_Obj *const objv[])
+                      Tcl_Size objc, Tcl_Obj *const objv[])
 {
     scanContext_t  *contextPtr, **tableEntryPtr;
     matchDef_t     *newmatch;
     int             regExpFlags = TCL_REG_ADVANCED;
-    int             firstArg = 1;
+    Tcl_Size        firstArg = 1;
 
     if (objc < 3)
         goto argError;
@@ -775,7 +775,7 @@ ScanFileCloseHandler (ClientData clientData)
 static int
 TclX_ScanfileObjCmd (ClientData clientData,
                      Tcl_Interp *interp,
-                     int objc,
+                     Tcl_Size objc,
                      Tcl_Obj *const objv[])
 {
     scanContext_t *contextPtr, **tableEntryPtr;
@@ -888,19 +888,19 @@ TclX_FilescanInit (Tcl_Interp *interp)
     /*
      * Initialize the commands.
      */
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
 			  "scanfile",
 			  TclX_ScanfileObjCmd,
                           (ClientData) scanTablePtr,
                           (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "scanmatch",
 			  TclX_ScanmatchObjCmd,
                           (ClientData) scanTablePtr, 
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "scancontext",
 			  TclX_ScancontextObjCmd,
                           (ClientData) scanTablePtr,

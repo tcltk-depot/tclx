@@ -22,43 +22,43 @@
 static int 
 TclX_AlarmObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size    objc,
                   Tcl_Obj *const objv[]);
 
 static int 
 TclX_LinkObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size    objc,
                  Tcl_Obj *const objv[]);
 
 static int 
 TclX_NiceObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size    objc,
                  Tcl_Obj *const objv[]);
 
 static int 
 TclX_SleepObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size    objc,
                   Tcl_Obj *const objv[]);
 
 static int 
 TclX_SyncObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size    objc,
                  Tcl_Obj *const objv[]);
 
 static int 
 TclX_SystemObjCmd (ClientData clientData,
                    Tcl_Interp *interp,
-                   int objc,
+                   Tcl_Size    objc,
                    Tcl_Obj *const objv[]);
 
 static int 
 TclX_UmaskObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size    objc,
                   Tcl_Obj *const objv[]);
 
 
@@ -75,7 +75,7 @@ TclX_UmaskObjCmd (ClientData clientData,
 static int 
 TclX_AlarmObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size    objc,
                   Tcl_Obj *const objv[])
 {
     double seconds;
@@ -105,7 +105,7 @@ TclX_AlarmObjCmd (ClientData clientData,
 static int 
 TclX_LinkObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size    objc,
                  Tcl_Obj *const objv[])
 {
     char *srcPath, *destPath;
@@ -174,7 +174,7 @@ TclX_LinkObjCmd (ClientData clientData,
 static int 
 TclX_NiceObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size    objc,
                  Tcl_Obj *const objv[])
 {
     Tcl_Obj    *resultPtr = Tcl_GetObjResult (interp);
@@ -223,7 +223,7 @@ TclX_NiceObjCmd (ClientData clientData,
 static int 
 TclX_SleepObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size    objc,
                   Tcl_Obj *const objv[])
 {
     double time;
@@ -251,7 +251,7 @@ TclX_SleepObjCmd (ClientData clientData,
 static int 
 TclX_SyncObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
-                 int objc,
+                 Tcl_Size    objc,
                  Tcl_Obj *const objv[])
 {
     Tcl_Channel  channel;
@@ -285,7 +285,7 @@ TclX_SyncObjCmd (ClientData clientData,
 static int 
 TclX_SystemObjCmd (ClientData clientData,
                    Tcl_Interp *interp,
-                   int objc,
+                   Tcl_Size    objc,
                    Tcl_Obj *const objv[])
 {
     Tcl_Obj *cmdObjPtr;
@@ -320,7 +320,7 @@ TclX_SystemObjCmd (ClientData clientData,
 static int 
 TclX_UmaskObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int objc,
+                  Tcl_Size    objc,
                   Tcl_Obj *const objv[])
 {
     int    mask;
@@ -361,19 +361,19 @@ TclX_UmaskObjCmd (ClientData clientData,
 void
 TclX_OsCmdsInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "alarm",
 			  TclX_AlarmObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "link",
 			  TclX_LinkObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "nice",
 			  TclX_NiceObjCmd,
                           (ClientData) NULL,
@@ -385,7 +385,7 @@ TclX_OsCmdsInit (Tcl_Interp *interp)
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL, 0);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
                           "sync",
 			  TclX_SyncObjCmd,
                           (ClientData) NULL,
@@ -397,7 +397,7 @@ TclX_OsCmdsInit (Tcl_Interp *interp)
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL, 0);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "umask",
 			  TclX_UmaskObjCmd,
                           (ClientData) NULL,

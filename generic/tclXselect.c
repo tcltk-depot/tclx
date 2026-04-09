@@ -79,7 +79,7 @@ ReturnSelectedFileList (fd_set        *fileDescSetPtr,
 static int 
 TclX_SelectObjCmd (ClientData clientData, 
                    Tcl_Interp *interp,
-                   int objc,
+                   Tcl_Size objc,
                    Tcl_Obj *const objv[]);
 
 
@@ -114,7 +114,7 @@ ParseSelectFileList (Tcl_Interp     *interp,
                      channelData_t **channelListPtr,
                      int            *maxFileIdPtr)
 {
-    int handleCnt, idx;
+    Tcl_Size handleCnt, idx;
     Tcl_Obj **handleObjv;
     channelData_t *channelList;
 
@@ -239,10 +239,10 @@ ReturnSelectedFileList (fd_set        *fileDescSetPtr,
                         int            fileDescCnt,
                         channelData_t *channelList)
 {
-    int idx, handleCnt;
+    int idx; /*, handleCnt;*/
     Tcl_Obj *fileHandleList = Tcl_NewListObj (0, NULL);
 
-    handleCnt = 0;
+    /*handleCnt = 0;*/
     for (idx = 0; idx < fileDescCnt; idx++) {
         if (((channelList [idx].readFd >= 0) &&
              FD_ISSET (channelList [idx].readFd, fileDescSetPtr)) ||
@@ -250,7 +250,7 @@ ReturnSelectedFileList (fd_set        *fileDescSetPtr,
              FD_ISSET (channelList [idx].writeFd, fileDescSetPtr))) {
             Tcl_ListObjAppendElement (NULL, fileHandleList,
                                       channelList [idx].channelIdObj);
-            handleCnt++;
+            /*handleCnt++;*/
         }
     }
 
@@ -274,7 +274,7 @@ ReturnSelectedFileList (fd_set        *fileDescSetPtr,
 static int 
 TclX_SelectObjCmd (ClientData clientData, 
                    Tcl_Interp *interp,
-                   int objc,
+                   Tcl_Size objc,
                    Tcl_Obj *const objv[])
 {
     static int chanAccess [] = {TCL_READABLE, TCL_WRITABLE, 0};
@@ -405,7 +405,7 @@ static int
 TclX_SelectObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
-    int          objc;
+    Tcl_Size objc;
     Tcl_Obj     *const objv[]
 {
     Tcl_AppendResult(interp, Tcl_GetString(objv[0]),
@@ -423,7 +423,7 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
 void
 TclX_SelectInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
                           "select",
                           TclX_SelectObjCmd,
                           (ClientData) NULL,

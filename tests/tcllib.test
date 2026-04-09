@@ -21,7 +21,15 @@ if {[cequal [info procs Test] {}]} {
     source [file join [file dirname [info script]] testlib.tcl]
 }
 
-auto_load auto_reset  ;# Make sure we have this before changing path.
+# Tcl's auto_reset (from auto.tcl) is auto-loaded, so it appears in
+# auto_index and deletes itself when called.  After that it can't be
+# re-loaded if auto_path doesn't include [info library].  Override with
+# a directly-defined proc that won't appear in auto_index and thus
+# won't delete itself.
+proc auto_reset {} {
+    global auto_execs auto_index auto_oldpath
+    unset -nocomplain auto_execs auto_index auto_oldpath ::tcl::auto_oldpath
+}
 
 global save_auto_path auto_path
 set save_auto_path $auto_path
@@ -45,6 +53,10 @@ if ![file isdirectory tcllib2.dir] {
 proc TclLibReset {} {
     auto_reset
     catch {unset auto_pkg_index}
+    # Re-register buildpackageindex since TclX sets it manually in tclx.tcl
+    # (there is no tclIndex in the tclx_library directory).
+    set ::auto_index(buildpackageindex) \
+        {source [file join $::tclx_library buildidx.tcl]}
 }
 
 #
@@ -147,7 +159,7 @@ test tcllib-3.2 {bogus package library index} {
 PutFile tcllib1.dir/test1.tndx \
 	{test1-package -1 140 TclLibAAB TclLibAAC TclLibAAD}
 TclLibReset
-
+	   
 test tcllib-3.3 {bogus package library index} {
     set re {^(error while autoloading "TclLibAAB": )?format error in library index ".*" \(test1-package -1 140 TclLibAAB TclLibAAC TclLibAAD\)$}
     list [catch {TclLibAAB} msg] [expr {[regexp $re $msg]?1:$msg}]
@@ -249,6 +261,9 @@ test tcllib-7.1 {Duplicate package handling} {
 TclLibReset
 
 test tcllib-7.2 {Duplicate package handling} {
+    # Our auto_reset doesn't delete procs (see comment at top of file),
+    # so DupPkgTest from 7.1 persists.  Delete it to force re-autoload.
+    catch {rename DupPkgTest {}}
     lrmdups {a b c}  ;# Force load of indices.
     loadlibindex tcllib2.dir/test2.tlib
     DupPkgTest
@@ -273,6 +288,9 @@ PutFile tcllib2.dir/test1.tcl \
 }
 
 test tcllib-7.3 {Duplicate package handling} {
+    # Our auto_reset doesn't delete procs (see comment at top of file),
+    # so DupPkgTest from 7.2 persists.  Delete it to force re-autoload.
+    catch {rename DupPkgTest {}}
     DupPkgTest
 } {Version-1}
 

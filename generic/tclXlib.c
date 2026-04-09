@@ -126,19 +126,19 @@ LoadDirIndexes (Tcl_Interp  *interp,
 static int
 TclX_load_tndxsObjCmd (ClientData  clientData,
                        Tcl_Interp *interp,
-                       int         objc,
+                       Tcl_Size    objc,
                        Tcl_Obj    *const objv[]);
                                    
 static int
 TclX_Auto_load_pkgObjCmd (ClientData clientData, 
                           Tcl_Interp *interp,
-                          int objc,
+                          Tcl_Size objc,
                           Tcl_Obj *const objv[]);
 
 static int
 TclX_LoadlibindexObjCmd (ClientData clientData, 
                          Tcl_Interp *interp,
-                         int objc,
+                         Tcl_Size objc,
                          Tcl_Obj *const objv[]);
 
 
@@ -396,7 +396,7 @@ GetPackageIndexEntry (Tcl_Interp *interp,
                       off_t      *offsetPtr,
                       unsigned   *lengthPtr)
 {
-    int   pkgDataObjc;
+    Tcl_Size  pkgDataObjc;
     Tcl_Obj **pkgDataObjv, *pkgDataPtr;
    
     /*
@@ -524,7 +524,8 @@ ProcessIndexFile (Tcl_Interp *interp,
 {
     Tcl_Channel  indexChannel = NULL;
     Tcl_DString  lineBuffer;
-    int          lineArgc, idx, result, tmpNum;
+    Tcl_Size     lineArgc, idx;
+    int          result, tmpNum;
     const char **lineArgv = NULL;
     off_t        offset;
     unsigned     length;
@@ -643,7 +644,7 @@ BuildPackageIndex (Tcl_Interp *interp, char *tlibFilePath)
     Tcl_DStringInit (&command);
 
     Tcl_DStringAppend (&command, 
-		       "if [catch {source -rsrc buildidx}] {source [file join $tclx_library buildidx.tcl]};", -1);
+		       "if {[catch {source buildidx.tcl} foo]} {source [file join $tclx_library buildidx.tcl]};", -1);
     Tcl_DStringAppend (&command, "buildpackageindex ", -1);
     Tcl_DStringAppend (&command, tlibFilePath, -1);
 
@@ -854,7 +855,7 @@ LoadDirIndexes (Tcl_Interp *interp, char *dirName)
 static int
 TclX_load_tndxsObjCmd (ClientData  clientData,
                        Tcl_Interp *interp,
-                       int         objc,
+                       Tcl_Size    objc,
                        Tcl_Obj    *const objv[])
 {
     char *dirname;
@@ -878,7 +879,7 @@ TclX_load_tndxsObjCmd (ClientData  clientData,
 static int
 TclX_Auto_load_pkgObjCmd (ClientData clientData, 
                           Tcl_Interp *interp,
-                          int objc,
+                          Tcl_Size objc,
                           Tcl_Obj *const objv[])
 {
     char     *fileName;
@@ -914,7 +915,7 @@ TclX_Auto_load_pkgObjCmd (ClientData clientData,
 static int
 TclX_LoadlibindexObjCmd (ClientData clientData, 
                          Tcl_Interp *interp,
-                         int objc,
+                         Tcl_Size objc,
                          Tcl_Obj *const objv[])
 {
     char        *pathName;
@@ -979,15 +980,15 @@ TclX_LibraryInit (Tcl_Interp *interp)
         return TCL_ERROR;
     }
     
-    Tcl_CreateObjCommand (interp, "tclx_load_tndxs",
+    Tcl_CreateObjCommand2 (interp, "tclx_load_tndxs",
                           TclX_load_tndxsObjCmd,
                           (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "auto_load_pkg",
+    Tcl_CreateObjCommand2 (interp, "auto_load_pkg",
                           TclX_Auto_load_pkgObjCmd,
                           (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "loadlibindex",
+    Tcl_CreateObjCommand2 (interp, "loadlibindex",
                           TclX_LoadlibindexObjCmd,
                           (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);

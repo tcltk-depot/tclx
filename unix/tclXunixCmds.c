@@ -22,13 +22,13 @@
 static int
 TclX_ChrootObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int         objc,
+                  Tcl_Size    objc,
 			      Tcl_Obj     *const objv[]);
 
 static int
 TclX_TimesObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
-                 int          objc,
+                 Tcl_Size     objc,
                  Tcl_Obj      *const objv[]);
 
 
@@ -45,11 +45,11 @@ TclX_TimesObjCmd (ClientData   clientData,
 static int
 TclX_ChrootObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
-                  int         objc,
-			      Tcl_Obj     *const objv[])
+                  Tcl_Size    objc,
+                  Tcl_Obj    *const objv[])
 {
-    char   *chrootString;
-    int     chrootStrLen;
+    char    *chrootString;
+    Tcl_Size chrootStrLen;
 
     if (objc != 2)
 	return TclX_WrongArgs (interp, objv [0], "path");
@@ -78,7 +78,7 @@ TclX_ChrootObjCmd (ClientData clientData,
 static int
 TclX_TimesObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
-                 int          objc,
+                 Tcl_Size     objc,
                  Tcl_Obj      *const objv[])
 {
     struct tms tm;
@@ -108,13 +108,13 @@ TclX_TimesObjCmd (ClientData   clientData,
 void
 TclX_PlatformCmdsInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "chroot",
 			  TclX_ChrootObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc *) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "times",
 			  TclX_TimesObjCmd,
                           (ClientData) NULL,

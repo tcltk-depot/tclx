@@ -29,7 +29,7 @@
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CoalesceObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+TclX_CoalesceObjCmd (ClientData clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[])
 {
     int i;
     Tcl_Obj *val;
@@ -76,13 +76,13 @@ TclX_CoalesceObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Ob
 void
 TclX_CoalesceInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "coalesce",
 			  TclX_CoalesceObjCmd,
               (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
 			  "tcl::mathfunc::coalesce",
 			  TclX_CoalesceObjCmd,
               (ClientData) NULL,

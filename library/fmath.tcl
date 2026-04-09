@@ -20,33 +20,44 @@
 #@package: TclX-fmath acos asin atan ceil cos cosh exp fabs floor log log10 \
            sin sinh sqrt tan tanh fmod pow atan2 abs double int round
 
-proc acos  x {uplevel 1 [list expr acos($x)]}
-proc asin  x {uplevel 1 [list expr asin($x)]}
-proc atan  x {uplevel 1 [list expr atan($x)]}
-proc ceil  x {uplevel 1 [list expr ceil($x)]}
-proc cos   x {uplevel 1 [list expr cos($x)]}
-proc cosh  x {uplevel 1 [list expr cosh($x)]}
-proc exp   x {uplevel 1 [list expr exp($x)]}
-proc fabs  x {uplevel 1 [list expr abs($x)]}
-proc floor x {uplevel 1 [list expr floor($x)]}
-proc log   x {uplevel 1 [list expr log($x)]}
-proc log10 x {uplevel 1 [list expr log10($x)]}
-proc sin   x {uplevel 1 [list expr sin($x)]}
-proc sinh  x {uplevel 1 [list expr sinh($x)]}
-proc sqrt  x {uplevel 1 [list expr sqrt($x)]}
-proc tan   x {uplevel 1 [list expr tan($x)]}
-proc tanh  x {uplevel 1 [list expr tanh($x)]}
+if {[package vcompare $::tcl_version 9.0] >= 0} {
+    foreach mfunc [info commands ::tcl::mathfunc::*] {
+	set mname [namespace tail $mfunc]
+	if {[info commands $mname] ne ""} continue
+	if {$mname in {coalesce}} continue
 
-proc fmod {x n} {uplevel 1 [list expr fmod($x,$n)]}
-proc pow {x n} {uplevel 1 [list expr pow($x,$n)]}
+	proc $mname args [format {uplevel 1 [list expr %s([join $args ,])]} $mname]
+    }
+    proc fabs args {uplevel 1 [list expr abs([join $args ,])]}
+} else {
+    proc acos  x {uplevel 1 [list expr acos($x)]}
+    proc asin  x {uplevel 1 [list expr asin($x)]}
+    proc atan  x {uplevel 1 [list expr atan($x)]}
+    proc ceil  x {uplevel 1 [list expr ceil($x)]}
+    proc cos   x {uplevel 1 [list expr cos($x)]}
+    proc cosh  x {uplevel 1 [list expr cosh($x)]}
+    proc exp   x {uplevel 1 [list expr exp($x)]}
+    proc fabs  x {uplevel 1 [list expr abs($x)]}
+    proc floor x {uplevel 1 [list expr floor($x)]}
+    proc log   x {uplevel 1 [list expr log($x)]}
+    proc log10 x {uplevel 1 [list expr log10($x)]}
+    proc sin   x {uplevel 1 [list expr sin($x)]}
+    proc sinh  x {uplevel 1 [list expr sinh($x)]}
+    proc sqrt  x {uplevel 1 [list expr sqrt($x)]}
+    proc tan   x {uplevel 1 [list expr tan($x)]}
+    proc tanh  x {uplevel 1 [list expr tanh($x)]}
 
-# New functions that TclX did not provide in eariler versions.
+    proc fmod {x n} {uplevel 1 [list expr fmod($x,$n)]}
+    proc pow {x n} {uplevel 1 [list expr pow($x,$n)]}
 
-proc atan2  x {uplevel 1 [list expr atan2($x)]}
-proc abs    x {uplevel 1 [list expr abs($x)]}
-proc double x {uplevel 1 [list expr double($x)]}
-proc int    x {uplevel 1 [list expr int($x)]}
-proc round  x {uplevel 1 [list expr round($x)]}
+    # New functions that TclX did not provide in eariler versions.
+
+    proc atan2  x {uplevel 1 [list expr atan2($x)]}
+    proc abs    x {uplevel 1 [list expr abs($x)]}
+    proc double x {uplevel 1 [list expr double($x)]}
+    proc int    x {uplevel 1 [list expr int($x)]}
+    proc round  x {uplevel 1 [list expr round($x)]}
+}
 
 
 

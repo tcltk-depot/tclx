@@ -489,6 +489,7 @@ TclXOSsystem (Tcl_Interp *interp,
     PROCESS_INFORMATION pi;
     STARTUPINFO si;
     BOOL bSuccess;
+    DWORD dwExitCode;
 
     memset (&si, 0, sizeof (si));
 
@@ -505,7 +506,8 @@ TclXOSsystem (Tcl_Interp *interp,
     }
     CloseHandle (pi.hThread);
     WaitForSingleObject (pi.hProcess, INFINITE);
-    GetExitCodeProcess (pi.hProcess, exitCode);
+    GetExitCodeProcess (pi.hProcess, &dwExitCode);
+    *exitCode = (int) dwExitCode;
     CloseHandle (pi.hProcess);
     return TCL_OK;
 }

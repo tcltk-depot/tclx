@@ -24,7 +24,7 @@
  */
 static int
 ParseLockUnlockArgs (Tcl_Interp     *interp,
-                     int             objc,
+                     Tcl_Size        objc,
                      Tcl_Obj *const  objv[],
                      int             argIdx,
                      TclX_FlockInfo *lockInfoPtr);
@@ -32,13 +32,13 @@ ParseLockUnlockArgs (Tcl_Interp     *interp,
 static int
 TclX_FlockObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
-                  int         objc,
+                  Tcl_Size    objc,
                   Tcl_Obj    *const objv[]);
 
 static int
 TclX_FunlockObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
-                     int         objc,
+                     Tcl_Size    objc,
                      Tcl_Obj    *const objv[]);
 
 
@@ -65,7 +65,7 @@ TclX_FunlockObjCmd (ClientData clientData,
  */
 static int
 ParseLockUnlockArgs (Tcl_Interp     *interp,
-                     int             objc,
+                     Tcl_Size        objc,
                      Tcl_Obj *const  objv[],
                      int             argIdx,
                      TclX_FlockInfo *lockInfoPtr)
@@ -123,7 +123,7 @@ ParseLockUnlockArgs (Tcl_Interp     *interp,
 static int
 TclX_FlockObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
-                  int         objc,
+                  Tcl_Size    objc,
                   Tcl_Obj    *const objv[])
 {
     int argIdx;
@@ -207,7 +207,7 @@ TclX_FlockObjCmd (ClientData clientData,
 static int
 TclX_FunlockObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
-                     int         objc,
+                     Tcl_Size    objc,
                      Tcl_Obj    *const objv[])
 {
     TclX_FlockInfo lockInfo;
@@ -233,13 +233,13 @@ TclX_FunlockObjCmd (ClientData clientData,
 void
 TclX_FlockInit (Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand (interp,
+    Tcl_CreateObjCommand2 (interp,
                           "flock",
                           TclX_FlockObjCmd,
                           (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand2 (interp, 
                           "funlock",
                           TclX_FunlockObjCmd,
                           (ClientData) NULL,

@@ -70,10 +70,10 @@ namespace eval TclXProfRep {
     proc sort {profDataVar sortKey} {
         upvar $profDataVar profData
 
-        case $sortKey {
-            {calls} {set keyIndex 0}
-            {real}  {set keyIndex 1}
-            {cpu}   {set keyIndex 2}
+        switch -- $sortKey {
+            calls {set keyIndex 0}
+            real  {set keyIndex 1}
+            cpu   {set keyIndex 2}
             default {
                 error "Expected a sort type of: `calls', `cpu' or ` real'"
             }

@@ -26,6 +26,8 @@
 #  define tclx_random random
 #endif
 
+#if TCL_MAJOR_VERSION <= 8
+
 #ifdef TCL_WIDE_INT_TYPE
 #define GET_DOUBLE_VALUE(doubleVar, argPtr, type)		\
     if ((type) == TCL_INT) {					\
@@ -67,6 +69,7 @@ static int	TclX_MinMaxFunc (ClientData   clientData,
                              Tcl_Interp  *interp,
 				             Tcl_Value *args,
                              Tcl_Value *resultPtr);
+#endif
 
 static int	TclX_RandomObjCmd (ClientData  clientData,
                                Tcl_Interp *interp,
@@ -74,6 +77,7 @@ static int	TclX_RandomObjCmd (ClientData  clientData,
                                Tcl_Obj     *const objv[]);
 
 
+#if TCL_MAJOR_VERSION <= 8
 /*-----------------------------------------------------------------------------
  * ConvertIntOrDoubleObj --
  *
@@ -246,6 +250,7 @@ static int	TclX_MinMaxFunc (ClientData   clientData,
     }
     return TCL_OK;
 }
+#endif
 
 /*-----------------------------------------------------------------------------
  * ReallyRandom --
@@ -335,6 +340,7 @@ static int	TclX_RandomObjCmd (ClientData  clientData,
 void
 TclX_MathInit (Tcl_Interp *interp)
 {
+#if TCL_MAJOR_VERSION <= 8
     int major, minor;
     Tcl_ValueType minMaxArgTypes[2];
 
@@ -346,10 +352,12 @@ TclX_MathInit (Tcl_Interp *interp)
 
     Tcl_CreateObjCommand (interp, "min", TclX_MinObjCmd,
 	    (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-
+#endif
+    
     Tcl_CreateObjCommand (interp, "random", TclX_RandomObjCmd,
 	    (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
+#if TCL_MAJOR_VERSION <= 8
     /*
      * Tcl 8.5 added core min/max expr functions
      */
@@ -361,6 +369,7 @@ TclX_MathInit (Tcl_Interp *interp)
 	Tcl_CreateMathFunc (interp, "min", 2, minMaxArgTypes,
 		TclX_MinMaxFunc, (ClientData) 0 /* IS_MIN */);
     }
+#endif
 }
 
 
